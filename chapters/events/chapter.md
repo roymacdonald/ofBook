@@ -158,8 +158,8 @@ Make a new empty project with the project generator and put the following in `of
 
 
 ````
-# pragma once
-# include "ofMain.h"
+#pragma once
+#include "ofMain.h"
 
 //This class is so simple and short that there's no need to make a new file for it.
 class SimpleEventsListener{
@@ -224,7 +224,7 @@ and this in ofApp.cpp
 
 
 ````
-# include "ofApp.h"
+#include "ofApp.h"
 
 void ofApp::setup(){}
 void ofApp::update(){}
@@ -304,9 +304,9 @@ ofApp.h
 
 
 ````
-# pragma once
+#pragma once
 
-# include "ofMain.h"
+#include "ofMain.h"
 
 class SimpleEventsListener{
 public:
@@ -377,7 +377,7 @@ class ofApp : public ofBaseApp{
 ofApp.cpp
 
 ````
-# include "ofApp.h"
+#include "ofApp.h"
 
 void ofApp::setup(){
 	ofAddListener(eventsListener.intEvent, this, &ofApp::intEventReceived);
@@ -418,9 +418,9 @@ Let's take this a little bit further.
 ofApp.h
 
 ````
-# pragma once
+#pragma once
 
-# include "ofMain.h"
+#include "ofMain.h"
 
 
 class RandomColorButton{
@@ -503,7 +503,7 @@ class ofApp : public ofBaseApp{
 ofApp.cpp
 
 ````
-# include "ofApp.h"
+#include "ofApp.h"
 
 
 void ofApp::setup(){
@@ -572,9 +572,9 @@ Notice whats going on in the `enableMouse()` and `disableMouse()` methods of `To
 ofApp.h
 
 ````
-# pragma once
+#pragma once
 
-# include "ofMain.h"
+#include "ofMain.h"
 
 
 class ToggleableButton{
@@ -662,7 +662,7 @@ class ofApp : public ofBaseApp{
 ofApp.cpp
 
 ````
-# include "ofApp.h"
+#include "ofApp.h"
 
 
 void ofApp::setup(){}
