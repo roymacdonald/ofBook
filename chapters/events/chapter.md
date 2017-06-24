@@ -726,6 +726,13 @@ You might be wondering how this is useful. For example, if you have several obje
 
 ### Events propagation
 
+Think of the following scenario. You have a button, similar to the ones of the previous examples; it gets drawn on a certain place inside your window and it reacts to the mouse events. At the same time you have an `ofEasyCam` object that its interaction area is the whole window. When you press the button the `ofEasyCam`will also react to the mouse interaction causing an unwanted behavior. How can we avoid this? There are several different way, but most are very cumbersome to use, having redundat code and not very flexible.
+There is a much nicer and elegant solution. This is by stopping the event propagation. As seen before, the events have a specific order for excecuting the callbacks, defined by their priority. If a certain condition is met while a callback is runned you can stop the event propagation, thus avoiding all the following callbacks getting called. It is also super simple to code. As we've seen in all the previous examples, all the callbacks have `void` as their return type. If you change the callback return type to `bool` and you make it to return `true` the propagation will stop.
+
+
+
+
+
 
 
 
