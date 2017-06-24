@@ -1,4 +1,4 @@
-# Events
+# ofEvents
 Written by Roy J. Macdonald
 
 openFrameworks has a super powerful events subsystem, which drives a lot of its internal workings and which you can make use to make your code a lot more cleaner, eficient and powerful.
@@ -30,7 +30,7 @@ This has a lot of uses but the most important thing is that it makes the code mo
 There are two important things that we need to be able to notify and listen events; 
 An **ofEvent instance** and a **callback function or method**.
 
-###ofEvent instance
+### ofEvent instance
 The ofEvent instance will probably be part of the class that will notify (send) this event. I say probably because it is not mandatory but it tends to be the common practice.
 If you make this object public it will be available to any other class but if it is private only other objects of the same class will be able to listen this event notifications.
 
@@ -51,7 +51,7 @@ For example, we can have a class called `B` that has an ofEvent that  will send 
 	
 Notice that the event type goes in between `ofEvent<` and `>`. let's call this the event's associated type.
 
-###The callback
+### The callback
 
 The callback function or method can be anywhere in your code, even a different class. It is up to you where you put it, it depends on what you want to do.
 
@@ -87,7 +87,7 @@ For example, let's declare a class called `A` that will have a callback function
 	
 Notice that the argument type of the callback function is the same as the events asociated type -the one in between the `<` and `>`. Also notice the `&` that follows the type in the callback. It is super important that you add it. Otherwise it will not work. This `&` means that the argument is passed as reference. [TO DO: link to the explanation of references, hopefully in the ofBook]
 
-##Adding and removing listeners
+## Adding and removing listeners
 
 In order to make the callback function to react to the event notifications we need to register them together. This is like a kind of link between the event and the callback which is managed by OF's internal events subsystem.
 
@@ -153,13 +153,13 @@ The adecuate callback function or method is one that has the same argument type 
 You can notice that these events are named the same as the functions that are declared by default in your `ofApp`. Also you can notice that `ofApp` inherits from `ofBaseApp`, which is the base class that is registernig to these OF core events and calling the according function of `ofApp`. Go and open `ofBaseApp` and take a look at what it is going on there. 
 
 
-#####Example Code 1
+##### Example Code 1
 Make a new empty project with the project generator and put the following in `ofApp.h`
 
 
 ````
-#pragma once
-#include "ofMain.h"
+# pragma once
+# include "ofMain.h"
 
 //This class is so simple and short that there's no need to make a new file for it.
 class SimpleEventsListener{
@@ -224,7 +224,7 @@ and this in ofApp.cpp
 
 
 ````
-#include "ofApp.h"
+# include "ofApp.h"
 
 void ofApp::setup(){}
 void ofApp::update(){}
@@ -250,7 +250,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){}
 Compile and run it. Move the mouse over the rectangle. It changes its color to a random one when we move the mouse over it. Not very impresive but did you notice that there's nothing else but the `eventsListener.draw();` call in the `ofApp.cpp` file. This makes `ofApp` not having to worry about whatever `eventsListener` has to do. This makes `SimpleEventsListener`  very independent from `ofApp`, meaning that you could be able to have another `SimpleEventsListener` object anywhere else and expect the same behavior. Try to expand this example and make a button class.
 
 
-###Using all the mouse events
+### Using all the mouse events
 If you want to register to all the mouse events you'll need to declare the following callback methods.
 
 	void mouseMoved(ofMouseEventArgs& args);
@@ -293,20 +293,20 @@ The same pattern applies for key and touch.
 	ofUnregisterTouchEvents(this);
 
 
-##Custom Events
+## Custom Events
 
 As we have already seen how to use openFrameworks core events it is time to see how to use custom events.
 Let's expand/modify a litle bit the previous example so `ofApp` reacts when the `SimpleEventsListener` object sends when the mouse is over its rectangle.
 
 
-#####Example Code 2
+##### Example Code 2
 ofApp.h
 
 
 ````
-#pragma once
+# pragma once
 
-#include "ofMain.h"
+# include "ofMain.h"
 
 class SimpleEventsListener{
 public:
@@ -377,7 +377,7 @@ class ofApp : public ofBaseApp{
 ofApp.cpp
 
 ````
-#include "ofApp.h"
+# include "ofApp.h"
 
 void ofApp::setup(){
 	ofAddListener(eventsListener.intEvent, this, &ofApp::intEventReceived);
@@ -412,15 +412,15 @@ void ofApp::dragEvent(ofDragInfo dragInfo){}
 
 Run this example. Now when you move the mouse over the rectangle the background changes to a random color.
 
-#####Example Code 3
+##### Example Code 3
 Let's take this a little bit further.
 
 ofApp.h
 
 ````
-#pragma once
+# pragma once
 
-#include "ofMain.h"
+# include "ofMain.h"
 
 
 class RandomColorButton{
@@ -503,7 +503,7 @@ class ofApp : public ofBaseApp{
 ofApp.cpp
 
 ````
-#include "ofApp.h"
+# include "ofApp.h"
 
 
 void ofApp::setup(){
@@ -565,16 +565,16 @@ and you notify it just by calling `ofNotifyEvent(voidEvent);`
 In all the previous examples we were Adding and removing the listeners when the app begun and exited, respectively. In a lot of cases you might not want it to happen this way, instead making this happen dynamically. This is done just like in the previous examples, but the important thing you need to care of is to not add a listener that's already added, because it might lead to unexpected behaviors. Even more important is not removing a listener that has not been added yet because the app will crash.
 But don't worry, there's a simple and safe way for handling this.
 
-#####Example Code 4
+##### Example Code 4
 
 Notice whats going on in the `enableMouse()` and `disableMouse()` methods of `ToggleableButton`.
 
 ofApp.h
 
 ````
-#pragma once
+# pragma once
 
-#include "ofMain.h"
+# include "ofMain.h"
 
 
 class ToggleableButton{
@@ -662,7 +662,7 @@ class ofApp : public ofBaseApp{
 ofApp.cpp
 
 ````
-#include "ofApp.h"
+# include "ofApp.h"
 
 
 void ofApp::setup(){}
