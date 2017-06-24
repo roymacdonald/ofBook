@@ -4,7 +4,7 @@ Written by Roy J. Macdonald
 openFrameworks has a super powerful events subsystem, which drives a lot of its internal workings and which you can make use to make your code a lot more cleaner, eficient and powerful.
 
 ## what is an ofEvent
-An event is like a broadcasted message; sent from somewhere and listened by anyone that wants to. Each time that an event is sent (notified), the events subsystem will check if there are any listeners (other parts of the code that are expecting for this message) and if so it will call the callback functions that were registered with each listener.
+An ofEvent is like a broadcasted message; sent from somewhere and listened by anyone that wants to. Each time that an ofEvent is sent (notified), the events subsystem will check if there are any listeners (other parts of the code that are expecting for this message) and if so it will call the callback functions that were registered with each listener.
 
 
 ## The events subsystem
@@ -21,20 +21,20 @@ Once `A` has finished its labor day it will call to events management and say "I
 
 This is more or less how the events work inside OF.
 
-## What are events useful for
+## What are ofEvents useful for
 
 This has a lot of uses but the most important thing is that it makes the code more eficient, cleaner, flexible and way more powerful. [TODO: give reasons for these].
 
-## Understanding events
+## Understanding ofEvents
 
-There are two important things that we need to be able to notify and listen events; 
+There are two important things that we need to be able to notify and to listen ofEvents; 
 An **ofEvent instance** and a **callback function or method**.
 
 ### ofEvent instance
-The ofEvent instance will probably be part of the class that will notify (send) this event. I say probably because it is not mandatory but it tends to be the common practice.
-If you make this object public it will be available to any other class but if it is private only other objects of the same class will be able to listen this event notifications.
+The ofEvent instance will probably be part of the class that will notify (send) it. I say probably because it is not mandatory but it tends to be the common practice.
+If you make this object public it will be available to any other class but if it is private only other objects of the same class will be able to listen this ofEvent notifications.
 
-As said, events are like messages, hence these will pass some kind of information. Because of this, this information needs to be of a previously specified type. This can be from a simple `int` to any kind of class. Because so, the event and the callback need to have the same kind of information.
+As said, ofEvents are like messages, hence these will pass some kind of information. Because of this, this information needs to be of a previously specified type. This can be from a simple `int` to any kind of class. Because so, the ofEvent and the callback need to have the same kind of information.
 
 For example, we can have a class called `B` that has an ofEvent that  will send an `int`. Something like:
 
@@ -42,14 +42,14 @@ For example, we can have a class called `B` that has an ofEvent that  will send 
 	public:
 	    //whatever else stuff of this class.
 	    void update(){
-	    	//when the desired conditions for sending the event are met we call
-			int i = ofGetFrameNum();//this is the information that the event will pass.
+	    	//when the desired conditions for sending the ofEvent are met we call
+			int i = ofGetFrameNum();//this is the information that the ofEvent will pass.
 	    	ofNotifyEvent(intEvent, i);
 	    }
 	    ofEvent<int> intEvent;
 	};
 	
-Notice that the event type goes in between `ofEvent<` and `>`. let's call this the event's associated type.
+Notice that the ofEvent type goes in between `ofEvent<` and `>`. let's call this the ofEvent's associated type.
 
 ### The callback
 
@@ -67,16 +67,16 @@ For example, let's declare a class called `A` that will have a callback function
 		}
 		~A(){// this is the class destructor.
 		
-			//We will unregister from the event when this object gets destroyed.
+			//We will unregister from the ofEvent when this object gets destroyed.
 			ofRemoveListener(myBInstance.intEvent, this, &B::myCallBackFunction);
 		}
 
 		void myCallBackFunction(int & i){// this is the callback method.
 		
-			//Here you write what you want to do when this event is received.
+			//Here you write what you want to do when this ofEvent is received.
 			//Probably using the passed argument, setting up a flag or calling some 
 			//other functions or methods. In this example we will just print to the console.
-			cout << "new event : "<< i << endl;
+			cout << "new ofEvent : "<< i << endl;
 		}
 		
 		B myBInstance;//This is the instance of B that we want to listen to.
@@ -85,36 +85,36 @@ For example, let's declare a class called `A` that will have a callback function
 	};
 	
 	
-Notice that the argument type of the callback function is the same as the events asociated type -the one in between the `<` and `>`. Also notice the `&` that follows the type in the callback. It is super important that you add it. Otherwise it will not work. This `&` means that the argument is passed as reference. [TO DO: link to the explanation of references, hopefully in the ofBook]
+Notice that the argument type of the callback function is the same as the ofEvents asociated type -the one in between the `<` and `>`. Also notice the `&` that follows the type in the callback. It is super important that you add it. Otherwise it will not work. This `&` means that the argument is passed as reference. [TO DO: link to the explanation of references, hopefully in the ofBook]
 
 ## Adding and removing listeners
 
-In order to make the callback function to react to the event notifications we need to register them together. This is like a kind of link between the event and the callback which is managed by OF's internal events subsystem.
+In order to make the callback function to react to the ofEvent notifications we need to register them together. This is like a kind of link between the ofEvent and the callback which is managed by OF's internal events subsystem.
 
 For registering you use `ofAddListener(...)` and `ofRemoveListener(...)`;
 
 As you can see from the previous piece of code, the arguments passed are the same in `ofAddListener` and `ofRemoveListener`, these are:
 
-		ofAddListener(myBInstance.intEvent,// this is the instance of the event that we want to listen to.
+		ofAddListener(myBInstance.intEvent,// this is the instance of the ofEvent that we want to listen to.
 					  this,// this is the pointer to the object that has the callback 
 					  &B::myCallBackFunction// this is the pointer to the callback.
 					  );
 These arguments mean:
 
-* `myBInstance.intEvent` is quite straight forwards. You just pass the event that you want to listen to.
+* `myBInstance.intEvent` is quite straight forwards. You just pass the ofEvent that you want to listen to.
 * `this` could be a bit confusing for newcomers. If you dont know what it means read here.[TODO: Put link to adecuate resource.]
 * `&B::myCallBackFunction`, has a bit more things. Firts there's a `&` which is used to dereference (turn something into a pointer). Read here [TODO: Put link to adecuate resource.] about pointers and references if you dont know what it means. Then there is `::`. It is used for specifying a certain something of a class. In this case it is the function `myCallbackFunction`of the class `B`.
 
 
-To stop a callback function from reacting to an event, we unregister it; we remove a listener. Use `ofRemoveListener` passing the exact same arguments you passed in `ofAddListener`.
+To stop a callback function from reacting to an ofEvent, we unregister it; we remove a listener. Use `ofRemoveListener` passing the exact same arguments you passed in `ofAddListener`.
 
 let's see some real world examples.
 
 
-## openFrameworks core events
+## openFrameworks core ofEvents
 
-The most simple way to use ofEvents is by listening to openFrameworks core events.
-In this case we only have to worry about providing an adecuate callback function and registering to the desired event. OF will take care of the rest internally.
+The most simple way to use ofEvents is by listening to openFrameworks core ofEvents.
+In this case we only have to worry about providing an adecuate callback function and registering to the desired ofEvent. OF will take care of the rest internally.
 You can access these by calling `ofEvents()`.
 
 These are:
@@ -148,9 +148,9 @@ These are:
 	ofEvent<ofDragInfo>			fileDragEvent;
 	ofEvent<uint32_t>			charEvent;
 
-The adecuate callback function or method is one that has the same argument type as the associated type of the event you want to listen to.
+The adecuate callback function or method is one that has the same argument type as the associated type of the ofEvent you want to listen to.
 
-You can notice that these events are named the same as the functions that are declared by default in your `ofApp`. Also you can notice that `ofApp` inherits from `ofBaseApp`, which is the base class that is registernig to these OF core events and calling the according function of `ofApp`. Go and open `ofBaseApp` and take a look at what it is going on there. 
+You can notice that these ofEvents are named the same as the functions that are declared by default in your `ofApp`. Also you can notice that `ofApp` inherits from `ofBaseApp`, which is the base class that is registernig to these OF core ofEvents and calling the according function of `ofApp`. Go and open `ofBaseApp` and take a look at what it is going on there. 
 
 
 ##### Example Code 1
@@ -165,7 +165,7 @@ Make a new empty project with the project generator and put the following in `of
 class SimpleEventsListener{
 public:
     SimpleEventsListener(){
-        //let's start listening to the mouseMoved event when this object gets created.
+        //let's start listening to the mouseMoved ofEvent when this object gets created.
         ofAddListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
         //let's set the rectangle we are going to draw.
         rect.set(200,300, 100,100);
@@ -250,8 +250,8 @@ void ofApp::dragEvent(ofDragInfo dragInfo){}
 Compile and run it. Move the mouse over the rectangle. It changes its color to a random one when we move the mouse over it. Not very impresive but did you notice that there's nothing else but the `eventsListener.draw();` call in the `ofApp.cpp` file. This makes `ofApp` not having to worry about whatever `eventsListener` has to do. This makes `SimpleEventsListener`  very independent from `ofApp`, meaning that you could be able to have another `SimpleEventsListener` object anywhere else and expect the same behavior. Try to expand this example and make a button class.
 
 
-### Using all the mouse events
-If you want to register to all the mouse events you'll need to declare the following callback methods.
+### Using all the mouse ofEvents
+If you want to register to all the mouse ofEvents you'll need to declare the following callback methods.
 
 	void mouseMoved(ofMouseEventArgs& args);
 	void mouseDragged(ofMouseEventArgs& args);
@@ -261,9 +261,9 @@ If you want to register to all the mouse events you'll need to declare the follo
 	void mouseEntered(ofMouseEventArgs& args);
 	void mouseExited(ofMouseEventArgs& args);
 
-Instead of having to start and stop listening to each individual event, openFrameworks comes with some handy helper functions for listening to mouse events, as well as keyboard and touch events.
+Instead of having to start and stop listening to each individual ofEvent, openFrameworks comes with some handy helper functions for listening to mouse ofEvents, as well as keyboard and touch ofEvents.
 
-So to start listening to the mouse events in a class, named for example `ListenerClass` you just need to use
+So to start listening to the mouse ofEvents in a class, named for example `ListenerClass` you just need to use
 	
 	ofRegisterMouseEvents(this);
 
@@ -295,7 +295,7 @@ The same pattern applies for key and touch.
 
 ## Custom Events
 
-As we have already seen how to use openFrameworks core events it is time to see how to use custom events.
+As we have already seen how to use openFrameworks core ofEvents it is time to see how to use custom ofEvents.
 Let's expand/modify a litle bit the previous example so `ofApp` reacts when the `SimpleEventsListener` object sends when the mouse is over its rectangle.
 
 
@@ -311,7 +311,7 @@ ofApp.h
 class SimpleEventsListener{
 public:
     SimpleEventsListener(){
-        //let's start listening to the mouseMoved event when this object gets created.
+        //let's start listening to the mouseMoved ofEvent when this object gets created.
         ofAddListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
         //let's set the rectangle we are going to draw.
         rect.set(200,300, 100,100);
@@ -428,7 +428,7 @@ public:
     RandomColorButton(){
         //In this case we will be listening to mouseReleased instead of mouseMoved
         ofAddListener(ofEvents().mouseReleased, this, &RandomColorButton::mouseReleased);
-        //Also we will listen to the draw event so this class draws by itself.
+        //Also we will listen to the draw ofEvent so this class draws by itself.
         ofAddListener(ofEvents().draw, this, &RandomColorButton::draw);
         
         //let's set the rectangle we are going to draw to a random size and position.
@@ -493,7 +493,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
-        // This is the callback method. Notice that it's argument is an ofColor which matches the RandomColorButton event.
+        // This is the callback method. Notice that it's argument is an ofColor which matches the RandomColorButton ofEvent.
         void colorEventReceived(ofColor & color);
     
         vector<RandomColorButton> buttons;
@@ -550,8 +550,8 @@ Run this code and see what happens.
 
 ## ofEvent<void>
 
-Also you can have events that dont send any additional data.
-If you declare an event as 
+Also you can have ofEvents that dont send any additional data.
+If you declare an ofEvent as 
 	
 	ofEvent<void> voidEvent;
 	
@@ -627,7 +627,7 @@ public:
     }
     
 protected:
-    //We will use this boo to check if the events are registered or not.
+    //We will use this bool to check if the ofEvents are registered or not.
     bool bListeningMouseEvent = false;
 
     ofRectangle rect;
@@ -707,13 +707,13 @@ void ofApp::dragEvent(ofDragInfo dragInfo){}
 
 ## ofEvent advanced features
 
-There are a few other things that events have that make them even more powerful and flexible.
+There are a few other things that ofEvents have that make them even more powerful and flexible.
 
 ### Events priority
 
-The OF events subsystem lets you specify the order in which the callbacks for the same event are called. This is done by setting its priority. 
+The OF events subsystem lets you specify the order in which the callbacks for the same ofEvent are called. This is done by setting its priority. 
 By default, when you call `ofAddListener(...)` the priority is set to `OF_EVENT_ORDER_AFTER_APP` so this will get called after the `ofApp` events are called.
-The event priority is set when the listener is added, by passing the priority, which is an `int`, as the fourth argument of `ofAddListener(...)`.
+The ofEvent priority is set when the listener is added, by passing the priority, which is an `int`, as the fourth argument of `ofAddListener(...)`.
 
 `OF_EVENT_ORDER_AFTER_APP` is just a preprocessor define equal to 200;
 There are also `OF_EVENT_ORDER_BEFORE_APP` that equals zero and `OF_EVENT_ORDER_APP` which equals 100.
