@@ -523,7 +523,7 @@ void ofApp::exit(){
 }
 //--------------------------------------------------------------
 void ofApp::draw(){
-//There's no need to draw the buttons. :)
+//There's no need to draw the buttons. These draw by themselves. :)
 }
 //--------------------------------------------------------------
 void ofApp::colorEventReceived(ofColor & color){
@@ -726,22 +726,148 @@ You might be wondering how this is useful. For example, if you have several obje
 
 ### Events propagation
 
-Think of the following scenario. You have a button, similar to the ones of the previous examples; it gets drawn on a certain place inside your window and it reacts to the mouse events. At the same time you have an `ofEasyCam` object that its interaction area is the whole window. When you press the button the `ofEasyCam`will also react to the mouse interaction causing an unwanted behavior. How can we avoid this? There are several different way, but most are very cumbersome to use, having redundat code and not very flexible.
-There is a much nicer and elegant solution. This is by stopping the event propagation. As seen before, the events have a specific order for excecuting the callbacks, defined by their priority. If a certain condition is met while a callback is runned you can stop the event propagation, thus avoiding all the following callbacks getting called. It is also super simple to code. As we've seen in all the previous examples, all the callbacks have `void` as their return type. If you change the callback return type to `bool` and you make it to return `true` the propagation will stop.
+Think of the following scenario. You have a button, similar to the ones of the previous examples; it gets drawn on a certain place inside your window and it reacts to the mouse events. At the same time you have an `ofEasyCam` object that its interaction area is the whole window. When you press the button the `ofEasyCam` will also react to the mouse interaction causing an unwanted behavior. How can we avoid this? There are several different way, but most are very cumbersome to use, having redundat code and not very flexible.
+
+There is a much nicer and elegant solution. This is by stopping the event propagation. As seen before, the events have a specific order for excecuting the callbacks, defined by their priority. If a certain condition is met while a callback is runned you can stop the event propagation, thus avoiding all the following callbacks getting called. It is also super simple to code.
+
+As we've seen in all the previous examples, all the callbacks have `void` as their return type. If you change the callback return type to `bool` and you make it to return `true` the propagation will stop.
+
+The following code example will implement what was described at the begining of this part.
+
+If you comment out the line that says  `#define STOP_EVENT_PROPAGATION`, the mouse events will not stop propagation.
+
+ofApp.h
+
+````
+#pragma once
+#include "ofMain.h"
+
+//Comment out the following line in order to allow event propagation.
+#define STOP_EVENT_PROPAGATION
+class DraggableRect{
+public:
+    
+    DraggableRect(){
+        rect.set(100,100, 130,100);
+        //I added all the mouse events call back just to show how handy the following function is.
+        #ifdef STOP_EVENT_PROPAGATION
+        
+        ofRegisterMouseEvents(this,OF_EVENT_ORDER_AFTER_APP -1);
+        #else
+        ofRegisterMouseEvents(this);
+        #endif
+    }
+    ~DraggableRect(){
+        #ifdef STOP_EVENT_PROPAGATION
+        ofUnregisterMouseEvents(this,OF_EVENT_ORDER_AFTER_APP -1);
+        #else
+        ofUnregisterMouseEvents(this);
+        #endif
+    }
+    #ifdef STOP_EVENT_PROPAGATION
+    bool mouseDragged( ofMouseEventArgs & mouse ){
+    #else
+    void mouseDragged( ofMouseEventArgs & mouse ){
+    #endif
+        
+        if(bDragging){
+            rect.x = mouse.x - offset.x;
+            rect.y = mouse.y - offset.y;
+        }
+    #ifdef STOP_EVENT_PROPAGATION
+        return bDragging;
+    #endif
+    }
+    #ifdef STOP_EVENT_PROPAGATION
+    bool mousePressed( ofMouseEventArgs & mouse ){
+    #else
+    void mousePressed( ofMouseEventArgs & mouse ){
+    #endif
+
+        if(rect.inside(mouse)){//notice that you can pass the mouse argument directly to the ofRectangle's inside method.
+            bDragging = true;
+            offset = mouse - rect.getPosition();
+            return true;
+        }
+    #ifdef STOP_EVENT_PROPAGATION
+        return bDragging;
+    #endif
+    }
+    void mouseReleased(ofMouseEventArgs & mouse){
+        bDragging  = false;
+    }
+    //Even when the following mouse callbacks are not being used we need to have these declared because otherwise the function ofRegisterMouseEvents will not work.
+    void mouseMoved( ofMouseEventArgs & mouse ){}
+    void mouseScrolled( ofMouseEventArgs & mouse ){}
+    void mouseEntered( ofMouseEventArgs & mouse ){}
+    void mouseExited( ofMouseEventArgs & mouse ){}
+
+    void draw(){
+        ofPushStyle();
+        ofSetColor(ofColor::red);
+        ofDrawRectangle(rect);
+        ofPopStyle();
+    }
+
+private:
+
+    ofVec2f offset;// this is to avoid having a jumpy rect when we start dragging.
+
+    bool bDragging = false;
+    ofRectangle rect;
+
+};
+
+class ofApp : public ofBaseApp{
+
+	public:
+		void draw();
+
+        DraggableRect rect;
+		    
+        ofEasyCam cam;
+};
+
+````
 
 
+ofApp.cpp
 
+````
+#include "ofApp.h"
+//--------------------------------------------------------------
+void ofApp::draw(){
+    
+    cam.begin();
+    // all that's in between cam.begin(); and cam.end(); is just to draw the magenta box with its vertices black
+    ofPushStyle();
+    ofFill();
+    ofSetColor(ofColor::darkMagenta);
+    ofDrawBox(0,0,0,100,100,100);
+    ofSetColor(30);
+    ofNoFill();
+    ofDrawBox(0,0,0,100,100,100);
+    ofPopStyle();
+    cam.end();
+    
+    rect.draw();
 
+    stringstream msg;
+    msg << "Clic and drag over the red square to move it around." << endl;
+    msg << "Clic and drag elsewhere to move the camera, hence rotate the magenta box";
+    ofDrawBitmapStringHighlight(msg.str(), 20,20);
 
+}
 
-
-
-
-
-[TODO: finish this section]
+````
 
 
 ### ofEvents and Lambda functions
+
+If you don't know about Lambda functions go and read the chapter about C++11. Even though when just a section of it is about Lambda functions read the whole chapter as it describes several super useful things.
+
+
+
 
 
 ### static ofEvents
