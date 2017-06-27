@@ -913,7 +913,7 @@ Take a look at the example in `ofFolder/examples/events/simpleEventsExample`.
 
 
 
-##THE RULE OF 3 (or 5)
+## THE RULE OF 3 (or 5)
 In C++ there is a rule, called the rule of 3, which became the rule of 5 in C++11.
 Read about it [here](https://en.wikipedia.org/wiki/Rule_of_three_(C%2B%2B_programming)).
 In short it says that if you add to a class any of the following you must add them all. 
