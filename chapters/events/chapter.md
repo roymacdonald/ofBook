@@ -128,12 +128,8 @@ public:
 
 **MH: I would steer clear of using the abstract "A" and "B" for class names. Maybe try "FrameSubject" and "FrameListener"**
 
-## openFrameworks core ofEvents
 The arguments passed in to `ofAddListener` and `ofRemoveListener` are the same, these are:
 
-The most simple way to use ofEvents is by listening to openFrameworks core ofEvents.
-In this case we only have to worry about providing an adecuate callback function and registering to the desired ofEvent. OF will take care of the rest internally.
-You can access these by calling `ofEvents()`.
 ```cpp
 ofAddListener(myBInstance.intEvent, // this is the instance of the ofEvent that we want to listen to.
                 this, // this is the pointer to the object that has the callback.
@@ -141,46 +137,54 @@ ofAddListener(myBInstance.intEvent, // this is the instance of the ofEvent that 
                 );
 ```
 
-These are:
 Here is what these arguments mean:
 
-	ofEvent<ofEventArgs> 		setup;
-	ofEvent<ofEventArgs> 		update;
-	ofEvent<ofEventArgs> 		draw;
-	ofEvent<ofEventArgs> 		exit;
 * `myBInstance.intEvent` is the ofEvent you want to listen to.
 * `this` could be a bit confusing for newcomers. If you don't know what it means see this resource. [TODO: Put link to adequate resource.]
 * `&B::myCallBackFunction` has two important parts. `B::myCallBackFunction` means find the function `myCallBackFunction` that is a member of the `B` class. The `&` is the "address-of" operator that allows us to find the memory address of the function. Read here [TODO: Put link to adequate resource.] about pointers and references if you don't know what it means.
 
-	ofEvent<ofResizeEventArgs> 	windowResized;
-	ofEvent<ofWindowPosEventArgs> 	windowMoved;
 To stop a callback function from reacting to an ofEvent, we must unregister it. Use `ofRemoveListener`, passing in the exact same arguments you passed in to `ofAddListener`.
 
-	ofEvent<ofKeyEventArgs> 	keyPressed;
-	ofEvent<ofKeyEventArgs> 	keyReleased;
 Now let's see some real world examples.
 
-	ofEvent<ofMouseEventArgs> 	mouseMoved;
-	ofEvent<ofMouseEventArgs> 	mouseDragged;
-	ofEvent<ofMouseEventArgs> 	mousePressed;
-	ofEvent<ofMouseEventArgs> 	mouseReleased;
-	ofEvent<ofMouseEventArgs> 	mouseScrolled;
-	ofEvent<ofMouseEventArgs> 	mouseEntered;
-	ofEvent<ofMouseEventArgs> 	mouseExited;
+## openFrameworks Core ofEvents
 
-	ofEvent<ofTouchEventArgs>	touchDown;
-	ofEvent<ofTouchEventArgs>	touchUp;
-	ofEvent<ofTouchEventArgs>	touchMoved;
-	ofEvent<ofTouchEventArgs>	touchDoubleTap;
-	ofEvent<ofTouchEventArgs>	touchCancelled;
+One simple way to use ofEvents is to listening to an openFrameworks core event. openFrameworks has ofEvents that correspond to `draw`, `keyPressed`, etc. We only have to worry about creating an appropriate listener - by providing a callback function and registering it to the desired ofEvent. You can access the core events by calling `ofEvents()`. The core events are:
 
-	ofEvent<ofMessage>			messageEvent;
-	ofEvent<ofDragInfo>			fileDragEvent;
-	ofEvent<uint32_t>			charEvent;
+```cpp
+ofEvent<ofEventArgs> 		setup;
+ofEvent<ofEventArgs> 		update;
+ofEvent<ofEventArgs> 		draw;
+ofEvent<ofEventArgs> 		exit;
 
-The adecuate callback function or method is one that has the same argument type as the associated type of the ofEvent you want to listen to.
+ofEvent<ofResizeEventArgs> 	windowResized;
+ofEvent<ofWindowPosEventArgs> 	windowMoved;
 
-You can notice that these ofEvents are named the same as the functions that are declared by default in your `ofApp`. Also you can notice that `ofApp` inherits from `ofBaseApp`, which is the base class that is registernig to these OF core ofEvents and calling the according function of `ofApp`. Go and open `ofBaseApp` and take a look at what it is going on there. 
+ofEvent<ofKeyEventArgs> 	keyPressed;
+ofEvent<ofKeyEventArgs> 	keyReleased;
+
+ofEvent<ofMouseEventArgs> 	mouseMoved;
+ofEvent<ofMouseEventArgs> 	mouseDragged;
+ofEvent<ofMouseEventArgs> 	mousePressed;
+ofEvent<ofMouseEventArgs> 	mouseReleased;
+ofEvent<ofMouseEventArgs> 	mouseScrolled;
+ofEvent<ofMouseEventArgs> 	mouseEntered;
+ofEvent<ofMouseEventArgs> 	mouseExited;
+
+ofEvent<ofTouchEventArgs>	touchDown;
+ofEvent<ofTouchEventArgs>	touchUp;
+ofEvent<ofTouchEventArgs>	touchMoved;
+ofEvent<ofTouchEventArgs>	touchDoubleTap;
+ofEvent<ofTouchEventArgs>	touchCancelled;
+
+ofEvent<ofMessage>			messageEvent;
+ofEvent<ofDragInfo>			fileDragEvent;
+ofEvent<uint32_t>			charEvent;
+```
+
+To listen to one of these events, you need to create a callback function or method with one parameter whose type matches the specific ofEvent you want to listen to. E.g. you would need a parameter of type `ofMouseEventArgs` for the `mouseMoved` event. For more information on these types, see the [events documentation page](http://openframeworks.cc/documentation/events/).
+
+You'll notice that these ofEvents have the same name as the default functions that are created in your `ofApp` class (e.g. `draw`, `setup`, etc.). `ofApp` inherits from `ofBaseApp` which handles registering these functions as listeners of the corresponding OF core ofEvents (e.g. `draw()` listens to `ofEvent<ofEventArgs> draw`). Go and open `ofBaseApp` and take a look at what it is going on there.
 
 
 ##### Example Code 1
