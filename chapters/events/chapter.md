@@ -14,10 +14,12 @@ In openFrameworks, an `ofEvent` instance is a subject. A listener can subscribe 
 
 **MH: I dropped the "The events subsystem" section. I think the example is confusing when using abstract "A" and "B". It could be added back with a more concrete example using something from every day life. E.g. maybe you could write it using a chatroom or mailing list analogy. You explicitly join/subscribe to a chat/mailing list. Once you've joined, you get notifications.**
 
+## Why are Events Useful?
 
-## What are ofEvents useful for
+Events allow you to write certain types of code in a clean and flexible way.
 
-This has a lot of uses but the most important thing is that it makes the code more eficient, cleaner, flexible and way more powerful. [TODO: give reasons for these].
+[TODO: give reasons for these].
+**MH: Some reasons that come to mind are decoupling components and creating one-to-many relationships. You might want to explicitly mention that event systems are often used in UI programming. See [Game Programming chapter on Observers](http://gameprogrammingpatterns.com/observer.html): "That's what the observer pattern is for. It lets one piece of code announce that something interesting happened without actually caring who receives the notification."**
 
 ## Understanding ofEvents
 
