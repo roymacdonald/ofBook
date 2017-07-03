@@ -390,139 +390,205 @@ protected:
 };
 
 
-##### Example Code 3
+class ofApp : public ofBaseApp{
+
+    public:
+        void setup();
+        void update();
+        void draw();
+        void exit();
+        void keyPressed(int key);
+        void keyReleased(int key);
+        void mouseMoved(int x, int y );
+        void mouseDragged(int x, int y, int button);
+        void mousePressed(int x, int y, int button);
+        void mouseReleased(int x, int y, int button);
+        void mouseEntered(int x, int y);
+        void mouseExited(int x, int y);
+        void windowResized(int w, int h);
+        void dragEvent(ofDragInfo dragInfo);
+        void gotMessage(ofMessage msg);
+    
+        void intEventReceived(int & i);
+    
+        SimpleEventsListener eventsListener;
+};
+```
+
+ofApp.cpp:
+
+```cpp
+#include "ofApp.h"
+
+void ofApp::setup(){
+    ofAddListener(eventsListener.intEvent, this, &ofApp::intEventReceived);
+}
+void ofApp::update(){}
+
+void ofApp::draw(){
+    eventsListener.draw();
+}
+void ofApp::exit(){
+    ofRemoveListener(eventsListener.intEvent, this, &ofApp::intEventReceived);
+}
+
+void ofApp::intEventReceived(int & i){
+    //Let's set the background color whenever we get this event 
+    ofSetBackgroundColor(ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255))));
+}
+
+void ofApp::keyPressed(int key){}
+void ofApp::keyReleased(int key){}
+void ofApp::mouseMoved(int x, int y ){}
+void ofApp::mouseDragged(int x, int y, int button){}
+void ofApp::mousePressed(int x, int y, int button){}
+void ofApp::mouseReleased(int x, int y, int button){}
+void ofApp::mouseEntered(int x, int y){}
+void ofApp::mouseExited(int x, int y){}
+void ofApp::windowResized(int w, int h){}
+void ofApp::gotMessage(ofMessage msg){}
+void ofApp::dragEvent(ofDragInfo dragInfo){}
+```
+
+Run this example. When you move the mouse over the rectangle, the background of the app changes to a random color.
+
+### Example: Many Buttons
+
+**MH: a GIF would really help make it immediately clear what the example is doing.**
+
 Let's take this a little bit further.
 
-ofApp.h
+ofApp.h:
+
+```cpp
+#pragma once
+
+#include "ofMain.h"
 
 
-    #pragma once
+class RandomColorButton{
+public:
+    RandomColorButton(){
+        //In this case we will be listening to mouseReleased instead of mouseMoved
+        ofAddListener(ofEvents().mouseReleased, this, &RandomColorButton::mouseReleased);
+        //Also we will listen to the draw ofEvent so this class draws by itself.
+        ofAddListener(ofEvents().draw, this, &RandomColorButton::draw);
+        
+        //let's set the rectangle we are going to draw to a random size and position.
+        //Instead of calling ofRandom directly inside rect.set() the following code avoids that
+        //the rectangle falls out of the window.
+        float w = ofRandom(30, 300);
+        float h = ofRandom(30, 300);
+        float x = ofRandom(ofGetWidth() - w);
+        float y = ofRandom(ofGetHeight() - h);
+        rect.set(x,y,w,h);
+        
+        //let's set rectangle's color to a random color
+        color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
+        
+    }
+    ~RandomColorButton(){
+        //this is the destructor. We need to rem
+        ofRemoveListener(ofEvents().mouseMoved, this, &RandomColorButton::mouseReleased);
+        ofRemoveListener(ofEvents().draw, this, &RandomColorButton::draw);
+    }
+    void mouseReleased(ofMouseEventArgs& args){
+        if(rect.inside(args.x, args.y)){
+            // now when you release the mouse inside this rectangle it will broadcast an event with its color
+            // This way ofApp will be able to change its background to the color of the clicked rectangle.
+            ofNotifyEvent(colorEvent, color);
+        }
+    }
     
-    #include "ofMain.h"
+    void draw(ofEventArgs&){
+        ofPushStyle();
+        ofSetColor(color);
+        ofDrawRectangle(rect);
+        ofPopStyle();
+    }
     
+    ofEvent<ofColor> colorEvent;
     
-    class RandomColorButton{
+protected:
+    ofRectangle rect;
+    ofColor color;
+
+};
+
+
+class ofApp : public ofBaseApp{
+
     public:
-        RandomColorButton(){
-            //In this case we will be listening to mouseReleased instead of mouseMoved
-            ofAddListener(ofEvents().mouseReleased, this, &RandomColorButton::mouseReleased);
-            //Also we will listen to the draw ofEvent so this class draws by itself.
-            ofAddListener(ofEvents().draw, this, &RandomColorButton::draw);
-            
-            //let's set the rectangle we are going to draw to a random size and position.
-            //Instead of calling ofRandom directly inside rect.set() the following code avoids that
-            //the rectangle falls out of the window.
-            float w = ofRandom(30, 300);
-            float h = ofRandom(30, 300);
-            float x = ofRandom(ofGetWidth() - w);
-            float y = ofRandom(ofGetHeight() - h);
-            rect.set(x,y,w,h);
-            
-            //let's set rectangle's color to a random color
-            color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
-            
-        }
-        ~RandomColorButton(){
-            //this is the destructor. We need to rem
-            ofRemoveListener(ofEvents().mouseMoved, this, &RandomColorButton::mouseReleased);
-            ofRemoveListener(ofEvents().draw, this, &RandomColorButton::draw);
-        }
-        void mouseReleased(ofMouseEventArgs& args){
-            if(rect.inside(args.x, args.y)){
-                // now when you release the mouse inside this rectangle it will broadcast an event with its color
-                // This way ofApp will be able to change its background to the color of the clicked rectangle.
-    			ofNotifyEvent(colorEvent, color);
-            }
-        }
-        
-        void draw(ofEventArgs&){
-            ofPushStyle();
-            ofSetColor(color);
-            ofDrawRectangle(rect);
-            ofPopStyle();
-        }
-        
-        ofEvent<ofColor> colorEvent;
-        
-    protected:
-        ofRectangle rect;
-        ofColor color;
+        void setup();
+        void update();
+        void draw();
+        void exit();
+
+        void keyPressed(int key);
+        void keyReleased(int key);
+        void mouseMoved(int x, int y );
+        void mouseDragged(int x, int y, int button);
+        void mousePressed(int x, int y, int button);
+        void mouseReleased(int x, int y, int button);
+        void mouseEntered(int x, int y);
+        void mouseExited(int x, int y);
+        void windowResized(int w, int h);
+        void dragEvent(ofDragInfo dragInfo);
+        void gotMessage(ofMessage msg);
     
-    };
+        // This is the callback method. Notice that it's argument is an ofColor which matches the RandomColorButton ofEvent.
+        void colorEventReceived(ofColor & color);
     
-    
-    class ofApp : public ofBaseApp{
-    
-    	public:
-    		void setup();
-    		void update();
-    		void draw();
-            void exit();
-    
-    		void keyPressed(int key);
-    		void keyReleased(int key);
-    		void mouseMoved(int x, int y );
-    		void mouseDragged(int x, int y, int button);
-    		void mousePressed(int x, int y, int button);
-    		void mouseReleased(int x, int y, int button);
-    		void mouseEntered(int x, int y);
-    		void mouseExited(int x, int y);
-    		void windowResized(int w, int h);
-    		void dragEvent(ofDragInfo dragInfo);
-    		void gotMessage(ofMessage msg);
-        
-            // This is the callback method. Notice that it's argument is an ofColor which matches the RandomColorButton ofEvent.
-            void colorEventReceived(ofColor & color);
-        
-            vector<RandomColorButton> buttons;
-    };
+        vector<RandomColorButton> buttons;
+};
+```
+
+ofApp.cpp:
+
+```cpp
+#include "ofApp.h"
 
 
-ofApp.cpp
-
-
-    #include "ofApp.h"
-    
-    
-    void ofApp::setup(){
-        //Make 100 buttons
-        buttons.resize(100);
-        for(int i = 0; i < buttons.size(); i++){
-            ofAddListener(buttons[i].colorEvent, this, &ofApp::colorEventReceived);
-        }
+void ofApp::setup(){
+    //Make 100 buttons
+    buttons.resize(100);
+    for(int i = 0; i < buttons.size(); i++){
+        ofAddListener(buttons[i].colorEvent, this, &ofApp::colorEventReceived);
     }
-    //--------------------------------------------------------------
-    void ofApp::update(){}
-    //--------------------------------------------------------------
-    void ofApp::exit(){
-        for(int i = 0; i < buttons.size(); i++){
-            ofRemoveListener(buttons[i].colorEvent, this, &ofApp::colorEventReceived);
-        }
+}
+//--------------------------------------------------------------
+void ofApp::update(){}
+//--------------------------------------------------------------
+void ofApp::exit(){
+    for(int i = 0; i < buttons.size(); i++){
+        ofRemoveListener(buttons[i].colorEvent, this, &ofApp::colorEventReceived);
     }
-    //--------------------------------------------------------------
-    void ofApp::draw(){
-    //There's no need to draw the buttons. These draw by themselves. :)
-    }
-    //--------------------------------------------------------------
-    void ofApp::colorEventReceived(ofColor & color){
-    	//Let's set the background color to the one sent in the received event
-        ofSetBackgroundColor(color);
-    }
-    //--------------------------------------------------------------
-    void ofApp::keyPressed(int key){}
-    void ofApp::keyReleased(int key){}
-    void ofApp::mouseMoved(int x, int y ){}
-    void ofApp::mouseDragged(int x, int y, int button){}
-    void ofApp::mousePressed(int x, int y, int button){}
-    void ofApp::mouseReleased(int x, int y, int button){}
-    void ofApp::mouseEntered(int x, int y){}
-    void ofApp::mouseExited(int x, int y){}
-    void ofApp::windowResized(int w, int h){}
-    void ofApp::gotMessage(ofMessage msg){}
-    void ofApp::dragEvent(ofDragInfo dragInfo){}
+}
+//--------------------------------------------------------------
+void ofApp::draw(){
+//There's no need to draw the buttons. These draw by themselves. :)
+}
+//--------------------------------------------------------------
+void ofApp::colorEventReceived(ofColor & color){
+    //Let's set the background color to the one sent in the received event
+    ofSetBackgroundColor(color);
+}
+//--------------------------------------------------------------
+void ofApp::keyPressed(int key){}
+void ofApp::keyReleased(int key){}
+void ofApp::mouseMoved(int x, int y ){}
+void ofApp::mouseDragged(int x, int y, int button){}
+void ofApp::mousePressed(int x, int y, int button){}
+void ofApp::mouseReleased(int x, int y, int button){}
+void ofApp::mouseEntered(int x, int y){}
+void ofApp::mouseExited(int x, int y){}
+void ofApp::windowResized(int w, int h){}
+void ofApp::gotMessage(ofMessage msg){}
+void ofApp::dragEvent(ofDragInfo dragInfo){}
+```
 
+Run this code and see what happens. **MH: describe the example**
 
-Run this code and see what happens.
 
 
 
