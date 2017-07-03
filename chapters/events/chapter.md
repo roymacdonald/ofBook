@@ -23,141 +23,142 @@ Events allow you to write certain types of code in a clean and flexible way.
 
 ## Understanding ofEvents
 
-There are two important things that we need to be able to notify and to listen ofEvents; 
-An **ofEvent instance** and a **callback function or method**.
+There are two parts to using the openFrameworks event system: an **`ofEvent` instance** (a subject) and a **callback function or method** (a listener).
 
-### ofEvent instance
-The ofEvent instance will probably be part of the class that will notify (send) it. I say probably because it is not mandatory but it tends to be the common practice.
-If you make this object public it will be available to any other class but if it is private only other objects of the same class will be able to listen this ofEvent notifications.
+### ofEvent Instance
 
-As said, ofEvents are like messages, hence these will pass some kind of information. Because of this, this information needs to be of a previously specified type. This can be from a simple `int` to any kind of class. Because so, the ofEvent and the callback need to have the same kind of information.
+The `ofEvent` instance is a subject that can be listened to by other parts of your code. If you make this `ofEvent` object public, any other class will be able to access it and add a listener. If you make it private only other objects of the same class will be able to listen to the event.
+
+ofEvents are like messages so these usually will involve passing some information when an event is triggered. In C++, this information needs to be specified with a type. This can be something simple like an `int` or it could be a custom class. The ofEvent and the callback both need to have the same type specified.
 
 For example, we can have a class called `B` that has an ofEvent that  will send an `int`. Something like:
 
-	class B {
-	public:
-	    //whatever else stuff of this class.
-	    void someFunction(){
-	    	//when the desired conditions for sending the ofEvent are met we call
-			int i = ofGetFrameNum();//this is the information that the ofEvent will pass.
-	    	ofNotifyEvent(intEvent, i);
-	    }
-	    ofEvent<int> intEvent;
-	};
+```cpp
+class B {
+public:
+    //whatever else stuff of this class.
+    void someFunction(){
+        //when the desired conditions for sending the ofEvent are met we call
+        int i = ofGetFrameNum();//this is the information that the ofEvent will pass.
+        ofNotifyEvent(intEvent, i);
+    }
+    ofEvent<int> intEvent;
+};
+```
+
+**MH: I would use a more descriptive name other than B for the class, e.g. FrameRateSubject**
+
+Notice that the ofEvent type goes in between `ofEvent<` and `>`. Let's call this the ofEvent's associated type.
+
+### The Callback
+
+The callback function or method can be anywhere in your code, usually in a different class. It can be a class-member (method) or non-class-member function. It needs to have a single parameter, a reference to a variable whose type matches the event's associated type. A callback for the `intEvent` of the previous class `B` would look something like:
 	
-Notice that the ofEvent type goes in between `ofEvent<` and `>`. let's call this the ofEvent's associated type.
+```cpp
+void myCallBackFunction(int & i){// this is the callback method.
 
-### The callback
+    //Here you write what you want to do when this ofEvent is received.
+    //Probably using the passed argument, setting up a flag or calling some 
+    //other functions or methods. In this example we will just print to the console.
+    cout << "new ofEvent : "<< i << endl;
+}
+```
 
-The callback function or method can be anywhere in your code, usually in a different class. It is up to you where you put it, it depends on what you want to do. It can be a class-member (method) or non-class-member function.
-It need to have a single argument, as a reference of the same type of the event's associated type.
-A callback for the `intEvent` of class `B` (the one in the previous code block) will look something like:
-	
-		void myCallBackFunction(int & i){// this is the callback method.
-			
-			//Here you write what you want to do when this ofEvent is received.
-			//Probably using the passed argument, setting up a flag or calling some 
-			//other functions or methods. In this example we will just print to the console.
-			cout << "new ofEvent : "<< i << endl;
-		}
-			
-	
-Notice that the argument type of the callback function is the same as the ofEvents asociated type -the one in between the `<` and `>`. Also notice the `&` that follows the type in the callback. It is super important that you add it. Otherwise it will not work. This `&` means that the argument is passed as reference. [TO DO: link to the explanation of references, hopefully in the ofBook]
+**MH: Might help to use a more descriptive variable name - e.g. `frameNum` - for the parameter**
 
-### Adding and removing listeners
+Notice that the callback's parameter type matches the ofEvents associated type - e.g. `ofEvent<int>`. Also notice the `&` that follows the type in the callback. This `&` means that the argument is passed as reference. This is necessary, and without it, the code won't work. For more information, check out [this section](https://github.com/openframeworks/ofBook/blob/master/chapters/cplusplus_basics/unabridged.md#dynamic-allocation-and-pointers) of the unabridged "C++ Language Basics" chapter.
 
-In order to make the callback function to react to the ofEvent notifications we need to register them together. This is like a kind of link between the ofEvent and the callback which is managed by OF's internal events subsystem.
+**MH: added a link to the C++ basics chapter that deals with references, but I would recommend linking to an additional, external C++ tutorial.**
 
-For registering you use `ofAddListener(...)` and `ofRemoveListener(...)`;
+### Adding and Removing Listeners
+
+In order to make a callback function react to an ofEvent's notifications, we need to register them together. For registering and unregistering, you use [`ofAddListener(...)`](http://openframeworks.cc/documentation/events/ofEventUtils/#!show_ofAddListener) and [`ofRemoveListener(...)`](http://openframeworks.cc/documentation/events/ofEventUtils/#!show_ofRemoveListener) respectively.
 
 For example, let's declare a class called `A` that will have a callback function. Just for the sake of simplicity, let's make `A` the owner of the `B` instance that we want to listen to.
-	
-	
-	class B {
-	public:
-	    //whatever else stuff of this class.
-	    void someFunction(){
-	    	//when the desired conditions for sending the ofEvent are met we call
-			int i = ofGetFrameNum();//this is the information that the ofEvent will pass.
-	    	ofNotifyEvent(intEvent, i);
-	    }
-	    ofEvent<int> intEvent;
-	};
-	
-	class A {
-	public:
-		A(){// this is the class constructor.
-		
-			//Here we will register our listener just for simplicity but you could 
-			//do this whenever you need to.
-			ofAddListener(myBInstance.intEvent, this, &B::myCallBackFunction);
-		}
-		~A(){// this is the class destructor.
-			
-			//We will unregister from the ofEvent when this object gets destroyed.
-			ofRemoveListener(myBInstance.intEvent, this, &B::myCallBackFunction);
-		}
-		
-		void myCallBackFunction(int & i){// this is the callback method.
-		
-			//Here you write what you want to do when this ofEvent is received.
-			//Probably using the passed argument, setting up a flag or calling some 
-			//other functions or methods. In this example we will just print to the console.
-			cout << "new ofEvent : "<< i << endl;
-		}
-		
-		B myBInstance;//This is the instance of B that we want to listen to.
-		
-		// anything else that this class need for working.
 
-		//The following are needed in order to comply with the rule of 3 (or 5)
-		//because this class has an explicitly declared destructor.		//Read about the rule of 3 (or 5) towards the end of this chapter
-		
-		A(const A &) =default;//default copy constructor
-		A & operator=(const A &) =default;//default copy assignment operator
-    	A & operator=(A &&) =default;//default move assignment operator
-		A(A &&) =default;//default move constructor
-		
-	};
-	
-	
+```cpp
+class B {
+public:
+    //whatever else stuff of this class.
+    void someFunction(){
+        //when the desired conditions for sending the ofEvent are met we call
+        int i = ofGetFrameNum();//this is the information that the ofEvent will pass.
+        ofNotifyEvent(intEvent, i);
+    }
+    ofEvent<int> intEvent;
+};
 
-As you can see from the previous piece of code, the arguments passed are the same in `ofAddListener` and `ofRemoveListener`, these are:
+class A {
+public:
+    A(){// this is the class constructor.
+    
+        //Here we will register our listener just for simplicity but you could 
+        //do this whenever you need to.
+        ofAddListener(myBInstance.intEvent, this, &A::myCallBackFunction);
+    }
+    ~A(){// this is the class destructor.
+        
+        //We will unregister from the ofEvent when this object gets destroyed.
+        ofRemoveListener(myBInstance.intEvent, this, &A::myCallBackFunction);
+    }
+    
+    void myCallBackFunction(int & i){// this is the callback method.
+    
+        //Here you write what you want to do when this ofEvent is received.
+        //Probably using the passed argument, setting up a flag or calling some 
+        //other functions or methods. In this example we will just print to the console.
+        cout << "new ofEvent : "<< i << endl;
+    }
+    
+    B myBInstance;//This is the instance of B that we want to listen to.
+    
+    // anything else that this class need for working.
 
-		ofAddListener(myBInstance.intEvent,// this is the instance of the ofEvent that we want to listen to.
-					  this,// this is the pointer to the object that has the callback 
-					  &B::myCallBackFunction// this is the pointer to the callback.
-					  );
-These arguments mean:
+    //The following are needed in order to comply with the rule of 3 (or 5)
+    //because this class has an explicitly declared destructor.
+    //Read about the rule of 3 (or 5) towards the end of this chapter
+    
+    A(const A &) =default;//default copy constructor
+    A & operator=(const A &) =default;//default copy assignment operator
+    A & operator=(A &&) =default;//default move assignment operator
+    A(A &&) =default;//default move constructor
+    
+};
+```
 
-* `myBInstance.intEvent` is quite straight forwards. You just pass the ofEvent that you want to listen to.
-* `this` could be a bit confusing for newcomers. If you dont know what it means read here.[TODO: Put link to adecuate resource.]
-* `&B::myCallBackFunction`, has a bit more things. Firts there's a `&` which is used to dereference (turn something into a pointer). Read here [TODO: Put link to adecuate resource.] about pointers and references if you dont know what it means. Then there is `::`. It is used for specifying a certain something of a class. In this case it is the function `myCallbackFunction`of the class `B`.
-
-
-To stop a callback function from reacting to an ofEvent, we unregister it; we remove a listener. Use `ofRemoveListener` passing the exact same arguments you passed in `ofAddListener`.
-
-let's see some real world examples.
-
+**MH: I would steer clear of using the abstract "A" and "B" for class names. Maybe try "FrameSubject" and "FrameListener"**
 
 ## openFrameworks core ofEvents
+The arguments passed in to `ofAddListener` and `ofRemoveListener` are the same, these are:
 
 The most simple way to use ofEvents is by listening to openFrameworks core ofEvents.
 In this case we only have to worry about providing an adecuate callback function and registering to the desired ofEvent. OF will take care of the rest internally.
 You can access these by calling `ofEvents()`.
+```cpp
+ofAddListener(myBInstance.intEvent, // this is the instance of the ofEvent that we want to listen to.
+                this, // this is the pointer to the object that has the callback.
+                &A::myCallBackFunction // this is the pointer to the callback.
+                );
+```
 
 These are:
+Here is what these arguments mean:
 
 	ofEvent<ofEventArgs> 		setup;
 	ofEvent<ofEventArgs> 		update;
 	ofEvent<ofEventArgs> 		draw;
 	ofEvent<ofEventArgs> 		exit;
+* `myBInstance.intEvent` is the ofEvent you want to listen to.
+* `this` could be a bit confusing for newcomers. If you don't know what it means see this resource. [TODO: Put link to adequate resource.]
+* `&B::myCallBackFunction` has two important parts. `B::myCallBackFunction` means find the function `myCallBackFunction` that is a member of the `B` class. The `&` is the "address-of" operator that allows us to find the memory address of the function. Read here [TODO: Put link to adequate resource.] about pointers and references if you don't know what it means.
 
 	ofEvent<ofResizeEventArgs> 	windowResized;
 	ofEvent<ofWindowPosEventArgs> 	windowMoved;
+To stop a callback function from reacting to an ofEvent, we must unregister it. Use `ofRemoveListener`, passing in the exact same arguments you passed in to `ofAddListener`.
 
 	ofEvent<ofKeyEventArgs> 	keyPressed;
 	ofEvent<ofKeyEventArgs> 	keyReleased;
+Now let's see some real world examples.
 
 	ofEvent<ofMouseEventArgs> 	mouseMoved;
 	ofEvent<ofMouseEventArgs> 	mouseDragged;
