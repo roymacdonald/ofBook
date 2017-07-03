@@ -932,49 +932,45 @@ Even if you don't follow this rule, your code will compile with no errors or war
 
 **MH: it would be good to add a note with a concrete example that might arise if you declare a destructor without the other 4...**
 
+## The New Way
 
+From openFrameworks v0.10 onwards (not yet released as of 07/03/17), there is a new way for registering listeners. The old way, the one we've been using throughout this chapter, still works. By using this new way, you can avoid having to declare the class destructor, hence no extra stuff to comply with the rule of 3 (or 5).
 
-## The new way
-As of openFrameworks v0.10 onwards, there is a new way for registering listeners. Yet the old way, the one we've seen throughout this chapter, still works.
-By using this new way you can avoid having to declare the class destructor, hence no extra stuff to comply with the rule of 3 (or 5). 
+The key ingredient in this new way is the new `ofEventListener` class. In order to register a listener to an ofEvent, you go through an `ofEventListener` object. This intermediary object allows you to easily unregister a listener without needing to specify any parameters (e.g. no need to remember the priority).
 
-The key ingredient of this new way is the addition of the `ofEventListener` class.
-In order to register to listen ofEvents in this new way you need to have an `ofEventListener` object for each callback you might want to link with an `ofEvent`.
+Taking the previous example from the ["Adding and Removing Listeners" section](#adding-and-removing-listeners). Using this new way would look like this:
 
-Using this new way the code in [Adding and removing listeners](#adding-and-removing-listeners)
+```cpp
+class B {
+public:
+    void someFunction(){
+        int i = ofGetFrameNum();
+        ofNotifyEvent(intEvent, i);
+    }
+    ofEvent<int> intEvent;
+};
 
-    class B {
-	public:
-	    void someFunction(){
-			int i = ofGetFrameNum();
-	    	ofNotifyEvent(intEvent, i);
-	    }
-	    ofEvent<int> intEvent;
-	};
-	
-	class A {
-	public:
-		A(){
-			listener = myBInstance.intEvent.newListener(this, &B::myCallBackFunction);
-		}
-		//There's no need to have a class destructor, because when the listener is destroyed
-		//it will automatically unregister itself.
-		
-		void myCallBackFunction(int & i){// this is the callback method.
-			cout << "new ofEvent : "<< i << endl;
-		}
-		void unregisterListener(){
-			listener.unsubscribe();
-		}		
-		B myBInstance;
-		ofEventListener listener;
-		
-	};
-	
-So, to add a listener you have to call the `newListener()` method of the event you want to listen to and asign it to the `ofEventListener` object, like in the constructor of class `A`.
+class A {
+public:
+    A(){
+        listener = myBInstance.intEvent.newListener(this, &B::myCallBackFunction);
+    }
+    //There's no need to have a class destructor, because when the listener is destroyed
+    //it will automatically unregister itself.
+    
+    void myCallBackFunction(int & i){// this is the callback method.
+        cout << "new ofEvent : "<< i << endl;
+    }
+    void unregisterListener(){
+        listener.unsubscribe();
+    }		
+    B myBInstance;
+    ofEventListener listener;
+    
+};
+```
 
-To unregister a listener just call its `unsubscribe()` method. Look at class `A`'s `unregisterListener` method.
-
+So, to add a listener you have to call the `newListener(...)` method of the `ofEvent` you want to listen to and assign it to the `ofEventListener` object, like in the constructor of class `A`. To unregister a listener just call its `unsubscribe()` method. Look at class `A`'s `unregisterListener` method.
 
 
 ### ofEvents and Lambda functions
