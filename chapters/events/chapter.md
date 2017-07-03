@@ -186,107 +186,104 @@ To listen to one of these events, you need to create a callback function or meth
 
 You'll notice that these ofEvents have the same name as the default functions that are created in your `ofApp` class (e.g. `draw`, `setup`, etc.). `ofApp` inherits from `ofBaseApp` which handles registering these functions as listeners of the corresponding OF core ofEvents (e.g. `draw()` listens to `ofEvent<ofEventArgs> draw`). Go and open `ofBaseApp` and take a look at what it is going on there.
 
+### Example: Color Changing Rectangle
 
-##### Example Code 1
-Make a new empty project with the project generator and put the following in `ofApp.h`
+**MH: a picture or GIF would really help make it immediately clear what the example is doing.**
 
+Make a new empty project with the project generator and put the following in `ofApp.h`:
 
+```cpp
+#pragma once
+#include "ofMain.h"
 
-    #pragma once
-    #include "ofMain.h"
-    
-    //This class is so simple and short that there's no need to make a new file for it.
-    class SimpleEventsListener{
-    public:
-        SimpleEventsListener(){
-            //let's start listening to the mouseMoved ofEvent when this object gets created.
-            ofAddListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
-            //let's set the rectangle we are going to draw.
-            rect.set(200,300, 100,100);
-        }
-        ~SimpleEventsListener(){
-            //this is the destructor. We need to rem
-            ofRemoveListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
-        }
-        void mouseMoved(ofMouseEventArgs& args){
-            if(rect.inside(args.x, args.y)){
-                //just make a random color.
-                color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
-            }
-        }
-        
-        void draw(){
-            ofPushStyle();
-            ofSetColor(color);
-            ofDrawRectangle(rect);
-            ofPopStyle();
-        }
-        
-        
-    protected:
-        ofRectangle rect;
-        ofColor color;
-    
-    };
-    
-    
-    class ofApp : public ofBaseApp{
-    
-    	public:
-    		void setup();
-    		void update();
-    		void draw();
-    
-    		void keyPressed(int key);
-    		void keyReleased(int key);
-    		void mouseMoved(int x, int y );
-    		void mouseDragged(int x, int y, int button);
-    		void mousePressed(int x, int y, int button);
-    		void mouseReleased(int x, int y, int button);
-    		void mouseEntered(int x, int y);
-    		void mouseExited(int x, int y);
-    		void windowResized(int w, int h);
-    		void dragEvent(ofDragInfo dragInfo);
-    		void gotMessage(ofMessage msg);
-        
-        
-            SimpleEventsListener eventsListener;
-    };
-		
-
-
-and this in ofApp.cpp
-
-
-
-    #include "ofApp.h"
-    
-    void ofApp::setup(){}
-    void ofApp::update(){}
-    
-    void ofApp::draw(){
-        eventsListener.draw();
+//This class is so simple and short that there's no need to make a new file for it.
+class SimpleEventsListener{
+public:
+    SimpleEventsListener(){
+        //let's start listening to the mouseMoved ofEvent when this object gets created.
+        ofAddListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
+        //let's set the rectangle we are going to draw.
+        rect.set(200,300, 100,100);
     }
-    void ofApp::keyPressed(int key){}
-    void ofApp::keyReleased(int key){}
-    void ofApp::mouseMoved(int x, int y ){}
-    void ofApp::mouseDragged(int x, int y, int button){}
-    void ofApp::mousePressed(int x, int y, int button){}
-    void ofApp::mouseReleased(int x, int y, int button){}
-    void ofApp::mouseEntered(int x, int y){}
-    void ofApp::mouseExited(int x, int y){}
-    void ofApp::windowResized(int w, int h){}
-    void ofApp::gotMessage(ofMessage msg){}
-    void ofApp::dragEvent(ofDragInfo dragInfo){}
+    ~SimpleEventsListener(){
+        //this is the destructor. We need to rem
+        ofRemoveListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
+    }
+    void mouseMoved(ofMouseEventArgs& args){
+        if(rect.inside(args.x, args.y)){
+            //just make a random color.
+            color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
+        }
+    }
     
+    void draw(){
+        ofPushStyle();
+        ofSetColor(color);
+        ofDrawRectangle(rect);
+        ofPopStyle();
+    }
+    
+    
+protected:
+    ofRectangle rect;
+    ofColor color;
+
+};
 
 
+class ofApp : public ofBaseApp{
 
-Compile and run it. Move the mouse over the rectangle. It changes its color to a random one when we move the mouse over it. Not very impresive but did you notice that there's nothing else but the `eventsListener.draw();` call in the `ofApp.cpp` file. This makes `ofApp` not having to worry about whatever `eventsListener` has to do. This makes `SimpleEventsListener`  very independent from `ofApp`, meaning that you could be able to have another `SimpleEventsListener` object anywhere else and expect the same behavior. Try to expand this example and make a button class.
+    public:
+        void setup();
+        void update();
+        void draw();
 
+        void keyPressed(int key);
+        void keyReleased(int key);
+        void mouseMoved(int x, int y );
+        void mouseDragged(int x, int y, int button);
+        void mousePressed(int x, int y, int button);
+        void mouseReleased(int x, int y, int button);
+        void mouseEntered(int x, int y);
+        void mouseExited(int x, int y);
+        void windowResized(int w, int h);
+        void dragEvent(ofDragInfo dragInfo);
+        void gotMessage(ofMessage msg);
+    
+    
+        SimpleEventsListener eventsListener;
+};
+```
+
+and this in ofApp.cpp:
+
+```cpp
+#include "ofApp.h"
+
+void ofApp::setup(){}
+void ofApp::update(){}
+
+void ofApp::draw(){
+    eventsListener.draw();
+}
+void ofApp::keyPressed(int key){}
+void ofApp::keyReleased(int key){}
+void ofApp::mouseMoved(int x, int y ){}
+void ofApp::mouseDragged(int x, int y, int button){}
+void ofApp::mousePressed(int x, int y, int button){}
+void ofApp::mouseReleased(int x, int y, int button){}
+void ofApp::mouseEntered(int x, int y){}
+void ofApp::mouseExited(int x, int y){}
+void ofApp::windowResized(int w, int h){}
+void ofApp::gotMessage(ofMessage msg){}
+void ofApp::dragEvent(ofDragInfo dragInfo){}
+```
+
+Compile and run it. Move the mouse over the rectangle, and you will see the rectangle changes to a random color. Not very impressive but notice that there's nothing else but the `eventsListener.draw();` call in the `ofApp.cpp` file. This means `ofApp` does not have to worry about whatever `eventsListener` is doing. This makes `SimpleEventsListener` and `ofApp` independent of one another, meaning that you could be able to have another `SimpleEventsListener` object anywhere else and expect the same behavior. Try to expand this example and make a button class.
 
 ### Using all the mouse ofEvents
 If you want to register to all the mouse ofEvents you'll need to declare the following callback methods.
+**MH: not sure what you are trying to say here. I think you want to say that SimpleEventsListener and ofApp are decoupled? That you could change the inner workings of SimpleEventsListener without breaking or having to change ofApp?**
 
 	void mouseMoved(ofMouseEventArgs& args);
 	void mouseDragged(ofMouseEventArgs& args);
