@@ -907,14 +907,14 @@ void ofApp::draw(){
 }
 ```
 
-### static ofEvents
 
-You can have static ofEvents. This can become useful in several situations.
-Take a look at the example in `ofFolder/examples/events/simpleEventsExample`.
+### Static ofEvents
+
+You can have static ofEvents. This can become useful in several situations. Take a look at the example in `ofFolder/examples/events/simpleEventsExample`.
 
 [TODO: explain this thoroughly].
 
-
+**MH: I think you can get away with a brief explanation and then point them towards the example.**
 
 
 ## THE RULE OF 3 (or 5)
