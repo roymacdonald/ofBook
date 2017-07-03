@@ -281,49 +281,59 @@ void ofApp::dragEvent(ofDragInfo dragInfo){}
 
 Compile and run it. Move the mouse over the rectangle, and you will see the rectangle changes to a random color. Not very impressive but notice that there's nothing else but the `eventsListener.draw();` call in the `ofApp.cpp` file. This means `ofApp` does not have to worry about whatever `eventsListener` is doing. This makes `SimpleEventsListener` and `ofApp` independent of one another, meaning that you could be able to have another `SimpleEventsListener` object anywhere else and expect the same behavior. Try to expand this example and make a button class.
 
-### Using all the mouse ofEvents
-If you want to register to all the mouse ofEvents you'll need to declare the following callback methods.
 **MH: not sure what you are trying to say here. I think you want to say that SimpleEventsListener and ofApp are decoupled? That you could change the inner workings of SimpleEventsListener without breaking or having to change ofApp?**
 
-	void mouseMoved(ofMouseEventArgs& args);
-	void mouseDragged(ofMouseEventArgs& args);
-	void mousePressed(ofMouseEventArgs& args);
-	void mouseReleased(ofMouseEventArgs& args);
-	void mouseScrolled(ofMouseEventArgs& args);
-	void mouseEntered(ofMouseEventArgs& args);
-	void mouseExited(ofMouseEventArgs& args);
+### Using All the Mouse ofEvents
 
-Instead of having to start and stop listening to each individual ofEvent, openFrameworks comes with some handy helper functions for listening to mouse ofEvents, as well as keyboard and touch ofEvents.
+If you want to register listeners to all the mouse ofEvents, you would need to declare the following callback methods and use `ofAddListener` for each:
 
-So to start listening to the mouse ofEvents in a class, named for example `ListenerClass` you just need to use
-	
-	ofRegisterMouseEvents(this);
+```cpp
+void mouseMoved(ofMouseEventArgs& args);
+void mouseDragged(ofMouseEventArgs& args);
+void mousePressed(ofMouseEventArgs& args);
+void mouseReleased(ofMouseEventArgs& args);
+void mouseScrolled(ofMouseEventArgs& args);
+void mouseEntered(ofMouseEventArgs& args);
+void mouseExited(ofMouseEventArgs& args);
+```
 
-instead of
+Instead of having to start listening to each individual ofEvent, openFrameworks comes with some handy helper functions for listening to all events of a particular type - all the mouse events, all the keyboard events or all the touch events. To start listening to all the mouse ofEvents in an example class named `ListenerClass`, you just need to use:
 
-	ofAddListener(ofEvents().mouseDragged, this,&ListenerClass::mouseDragged);
-	ofAddListener(ofEvents().mouseMoved,   this,&ListenerClass::mouseMoved);
-	ofAddListener(ofEvents().mousePressed, this,&ListenerClass::mousePressed);
-	ofAddListener(ofEvents().mouseReleased,this,&ListenerClass::mouseReleased);
-	ofAddListener(ofEvents().mouseScrolled,this,&ListenerClass::mouseScrolled);
-	ofAddListener(ofEvents().mouseEntered, this,&ListenerClass::mouseEntered);
-	ofAddListener(ofEvents().mouseExited,  this,&ListenerClass::mouseExited);
+```cpp
+ofRegisterMouseEvents(this);
+```
 
-and to stop listening just call:
+Which is equivalent to writing:
 
-	ofUnregisterMouseEvents(this);
+```cpp
+ofAddListener(ofEvents().mouseDragged, this,&ListenerClass::mouseDragged);
+ofAddListener(ofEvents().mouseMoved,   this,&ListenerClass::mouseMoved);
+ofAddListener(ofEvents().mousePressed, this,&ListenerClass::mousePressed);
+ofAddListener(ofEvents().mouseReleased,this,&ListenerClass::mouseReleased);
+ofAddListener(ofEvents().mouseScrolled,this,&ListenerClass::mouseScrolled);
+ofAddListener(ofEvents().mouseEntered, this,&ListenerClass::mouseEntered);
+ofAddListener(ofEvents().mouseExited,  this,&ListenerClass::mouseExited);
+```
+
+To stop listening just call:
+
+```cpp
+ofUnregisterMouseEvents(this);
+```
 
 Super handy! :)
 
 The same pattern applies for key and touch.
 
+```cpp
+ofRegisterKeyEvents(this);
+ofRegisterTouchEvents(this);
 
-	ofRegisterKeyEvents(this);
-	ofRegisterTouchEvents(this);
+ofUnregisterKeyEvents(this);
+ofUnregisterTouchEvents(this);
+```
 
-	ofUnregisterKeyEvents(this);
-	ofUnregisterTouchEvents(this);
-
+Note: you still need to have methods defined with the appropriate names (e.g. `mouseDragged`, `mouseMoved`, etc.).
 
 ## Custom Events
 
