@@ -762,14 +762,11 @@ There are other features of ofEvents that make them even more flexible: event pr
 
 ### Priority
 
-The OF events subsystem lets you specify the order in which the callbacks for the same ofEvent are called. This is done by setting its priority. 
-By default, when you call `ofAddListener(...)` the priority is set to `OF_EVENT_ORDER_AFTER_APP`, meaning that the callback will get called after the `ofApp` events are called.
-The ofEvent priority is set when the listener is added, by passing the priority, which is an `int`, as the fourth argument of `ofAddListener(...)`.
+The OF events system lets you specify the order in which the listeners for the same ofEvent are called. This allows you to do things like specify the order in which `draw` listeners are called (a z-index of sorts). It will also become important in the next section - event propagation.
 
-`OF_EVENT_ORDER_AFTER_APP` is just a preprocessor define equal to 200;
-There are also `OF_EVENT_ORDER_BEFORE_APP` that equals zero and `OF_EVENT_ORDER_APP` which equals 100.
+You define the order by giving each listener a priority (an `int`) when you add it to an event. Listeners with a lower priority `int` are called before listeners with a higher priority `int`. By default, when you call `ofAddListener(...)` the priority is set to `OF_EVENT_ORDER_AFTER_APP`, meaning that the listener will get called after the `ofApp` events are called. You can set the priority yourself by passing an `int` as the fourth argument of `ofAddListener(...)`. You will need to pass the same priority `int` when you remove the listener with `ofRemoveListener(...)`.
 
-It is important to notice that you need to pass to `ofRemoveListener(...)` the same priority as the one used in `ofAddListener(...)`.
+`OF_EVENT_ORDER_AFTER_APP` is a preprocessor define constant equal to 200. There are two other constants: `OF_EVENT_ORDER_BEFORE_APP` which equals zero and `OF_EVENT_ORDER_APP` which equals 100.
 
 
 You might be wondering how this is useful. For example, if you have several objects listening to the `draw` core event you can controll which object one is drawn first and which last.
