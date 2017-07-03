@@ -607,11 +607,10 @@ void theCallbackFunction(){}
 
 Then you can trigger an event with: `ofNotifyEvent(voidEvent);`
 
-## Start and stop listening as desired.
-In all the previous examples we were adding and removing the listeners when the app begun and exited, respectively. In a lot of cases you might not want it to happen this way, instead making this happen dynamically. This is done just like in the previous examples, but the important thing you need to care of is to not add a listener that's already added, because it might lead to unexpected behaviors. Even more important is not removing a listener that has not been added yet because the app will crash.
-But don't worry, there's a simple and safe way for handling this.
+## Dynamically Starting and Stopping Listening
 
 ##### Example Code 4
+In all the previous examples we were adding and removing the listeners when the app begun and exited, respectively. In a lot of cases you might not want it to happen this way. Instead, you may want it to happen dynamically. This is done just like in the previous examples, but with extra attention to registering and unregistering. You need make sure to not add a listener that has already been added, because it might lead to unexpected behaviors. Even more important, you need to make sure to not unregister a listener before it has been added because the app will crash. Don't worry - there's a simple and safe way to handle this.
 
 Notice whats going on in the `enableMouse()` and `disableMouse()` methods of `ToggleableButton`.
 
