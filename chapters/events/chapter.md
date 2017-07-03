@@ -589,21 +589,23 @@ void ofApp::dragEvent(ofDragInfo dragInfo){}
 
 Run this code and see what happens. **MH: describe the example**
 
+### ofEvent<void>
 
+**MH: I would move this section earlier so that your initial rectangle example can use void instead of int (since the int is not being used for anything).**
 
+You can have ofEvents that don't send any additional data. If you declare an ofEvent as:
 
-## ofEvent<void>
+```cpp
+ofEvent<void> voidEvent;
+```
 
-Also you can have ofEvents that dont send any additional data.
-If you declare an ofEvent as 
-	
-	ofEvent<void> voidEvent;
-	
-the callback function you associate with it need to have no argumets.
+A listener would need a callback function with no arguments:
 
-	void theCallbackFunction(){}
-and you notify it just by calling `ofNotifyEvent(voidEvent);`
+```cpp
+void theCallbackFunction(){}
+```
 
+Then you can trigger an event with: `ofNotifyEvent(voidEvent);`
 
 ## Start and stop listening as desired.
 In all the previous examples we were adding and removing the listeners when the app begun and exited, respectively. In a lot of cases you might not want it to happen this way, instead making this happen dynamically. This is done just like in the previous examples, but the important thing you need to care of is to not add a listener that's already added, because it might lead to unexpected behaviors. Even more important is not removing a listener that has not been added yet because the app will crash.
