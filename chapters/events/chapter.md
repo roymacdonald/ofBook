@@ -8,21 +8,12 @@ openFrameworks has a super powerful events system which you can use to write cle
 
 The event system is based around the idea of broadcasting messages. A part of your code can send messages to other parts that are listening. This is called the ["observer pattern"](https://en.wikipedia.org/wiki/Observer_pattern). There are "subjects" (senders) and "observers" (listeners). Observers subscribe to the particular subject they are interested in listening to. When a subject decides to send a message, any listeners that are subscribed will be notified of that message.
 
-## The events subsystem
-OpenFrameworks has an underlaying system that is in charge of handling ofEvents.
-In order to understand how it works imagine the following.
 In openFrameworks, an `ofEvent` instance is a subject. A listener can subscribe to an `ofEvent` via  [`ofAddListener`](http://openframeworks.cc/documentation/events/ofEventUtils/#!show_ofAddListener). When a listener registers with an `ofEvent`, it specifies a "callback" - a function that will be invoked when the event is triggered.
 
-There's a big company with lots of different subdivisions, but a lot of the work that each subdivision has to do depends on another subdivision having finished its work.
-Think of two subdivisions, `A` and `B` (in code each could be a different class). `A` depends on `B` having its work finished in order to make its own.
 **MH: It would be useful to include an image here. Check out the Auctioneer image [here](https://sourcemaking.com/design_patterns/observer).**
 
-The company has an events management system (just like OF). When operations in `A` start each day, `A` will call the events management and tell "Hey, please let me know when `B` has finished its job. Call back to this subdivision and give us the information related to the job finished." 
-So now, `A` can forget about whatever `B` is doing until it gets called back with the new information about the finished job.
-When `B` finishes its job, it will call to events management and give it the relevant information about this just finished job. Then events management will call back to whom ever wanted to know that `B` finished its job. In this case it is just `A`, but it could be any number of subdivisions.
-Once `A` has finished its labor day it will call to events management and say "I don't need to be notified about `B` finishing his job". This way it frees events management from spending time trying to reach an unoperative subdivision. 
+**MH: I dropped the "The events subsystem" section. I think the example is confusing when using abstract "A" and "B". It could be added back with a more concrete example using something from every day life. E.g. maybe you could write it using a chatroom or mailing list analogy. You explicitly join/subscribe to a chat/mailing list. Once you've joined, you get notifications.**
 
-This is more or less how the events work inside OF.
 
 ## What are ofEvents useful for
 
