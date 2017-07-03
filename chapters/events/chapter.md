@@ -756,12 +756,9 @@ ofApp.cpp:
     void ofApp::dragEvent(ofDragInfo dragInfo){}
 ```
 
+## ofEvent Advanced Features
 
-
-
-## ofEvent advanced features
-
-There are a few other things that ofEvents have that make them even more powerful and flexible.
+There are other features of ofEvents that make them even more flexible: event priority, event propagation and static events.
 
 ### Priority
 
