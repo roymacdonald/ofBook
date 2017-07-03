@@ -1,7 +1,8 @@
 # ofEvents
+
 Written by Roy J. Macdonald
 
-openFrameworks has a super powerful events subsystem, which drives a lot of its internal workings and which you can make use to make your code a lot more cleaner, eficient and powerful.
+openFrameworks has a super powerful events system which you can use to write cleaner and more flexible code. The system comes with openFrameworks-specific lifecycle events that you can hook into, like `draw` and `mouseMoved`. It also allows you to create your own custom events, so that you can do things like create a self-contained button class.
 
 ## what is an ofEvent
 An ofEvent is like a broadcasted message; sent from somewhere and listened by anyone that wants to. Each time that an ofEvent is sent (notified), the events subsystem will check if there are any listeners (other parts of the code that are expecting for this message) and if so it will call the callback functions that were registered with each listener.
