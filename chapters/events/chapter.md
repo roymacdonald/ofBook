@@ -916,11 +916,9 @@ You can have static ofEvents. This can become useful in several situations. Take
 
 **MH: I think you can get away with a brief explanation and then point them towards the example.**
 
+## The Rule of 3 (or 5)
 
-## THE RULE OF 3 (or 5)
-In C++ there is a rule, called the rule of 3, which became the rule of 5 in C++11.
-Read about it [here](https://en.wikipedia.org/wiki/Rule_of_three_(C%2B%2B_programming)).
-In short it says that if you add to a class any of the following you must add them all. 
+In C++ there is a rule, called the rule of 3, which became the rule of 5 in C++11. Read about it [here](https://en.wikipedia.org/wiki/Rule_of_three_(C%2B%2B_programming)). In short, it says that if you one of the following methods to a class, you must add all of them: 
 
 *  destructor `~ClassName(){...}`
 *  copy constructor `ClassName(ClassName& other)`
@@ -928,11 +926,11 @@ In short it says that if you add to a class any of the following you must add th
 *  move assignment operator (C++11 only) `ClassName& operator=(ClassName&& other)`
 *  move constructor (C++11 only) `ClassName(ClassName&& other)`
 
-So, in order to have exception-safe code you must follow this rule.
+So, in order to have exception-safe code you must follow this rule. When listening to any `ofEvent` in your custom classes, it is a good idea to stop listening to these when the class instance is destroyed. This means that you will declare the class destructor, and hence, you'll have to follow this rule.
 
-When listening to any `ofEvent` in your custom classes, it is a good idea to stop listening to these when the class instance is destroyed. This means that you will declare the class destructor, hence you'll have to follow this rule. 
+Even if you don't follow this rule, your code will compile with no errors or warnings, and it will probably work well, but it will not be exception-safe, and you run the risk of having several undesired side-effects, which can be really hard to debug.
 
-Even if you don't follow this rule, your code will compile with no errors or warnings and it will probably work well, but it will not be exception-safe, and you run the risk of having several undesired side-effects, which can be really hard to debug.
+**MH: it would be good to add a note with a concrete example that might arise if you declare a destructor without the other 4...**
 
 
 
@@ -1011,4 +1009,3 @@ For example, the previous code using a lambda function as the callback would be:
 		ofEventListener listener;
 		
 	};
-
