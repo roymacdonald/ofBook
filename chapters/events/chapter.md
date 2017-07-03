@@ -609,109 +609,112 @@ Then you can trigger an event with: `ofNotifyEvent(voidEvent);`
 
 ## Dynamically Starting and Stopping Listening
 
-##### Example Code 4
 In all the previous examples we were adding and removing the listeners when the app begun and exited, respectively. In a lot of cases you might not want it to happen this way. Instead, you may want it to happen dynamically. This is done just like in the previous examples, but with extra attention to registering and unregistering. You need make sure to not add a listener that has already been added, because it might lead to unexpected behaviors. Even more important, you need to make sure to not unregister a listener before it has been added because the app will crash. Don't worry - there's a simple and safe way to handle this.
 
-Notice whats going on in the `enableMouse()` and `disableMouse()` methods of `ToggleableButton`.
+### Example: Buttons That Can Be Enabled and Disabled
 
-ofApp.h
+**MH: a GIF would really help make it immediately clear what the example is doing. It would also help to describe the example before jumping into code.**
+
+Notice what's going on in the `enableMouse()` and `disableMouse()` methods of `ToggleableButton`.
+
+ofApp.h:
+
+```cpp
+#pragma once
+
+#include "ofMain.h"
 
 
-    #pragma once
+class ToggleableButton{
+public:
+    ToggleableButton(){
+        enableMouse();
+        rect.set(ofGetWidth()*0.25,ofGetHeight()*0.25,ofGetWidth()*0.5,ofGetHeight()*0.5);
+    }
+    ~ToggleableButton(){
+        //this is the destructor.
+        disableMouse();
+    }
     
-    #include "ofMain.h"
-    
-    
-    class ToggleableButton{
-    public:
-        ToggleableButton(){
-            enableMouse();
-            rect.set(ofGetWidth()*0.25,ofGetHeight()*0.25,ofGetWidth()*0.5,ofGetHeight()*0.5);
+    void enableMouse(){
+        if(!bListeningMouseEvent){
+            //So only when it is not listening we will add a listener
+            bListeningMouseEvent = true;
+            ofAddListener(ofEvents().mouseReleased, this, &ToggleableButton::mouseReleased);
         }
-        ~ToggleableButton(){
-            //this is the destructor.
+    }
+    void disableMouse(){
+        if(bListeningMouseEvent){
+            bListeningMouseEvent = false;
+            ofRemoveListener(ofEvents().mouseReleased, this, &ToggleableButton::mouseReleased);
+        }
+    }
+    
+    //This is just a helper method.
+    void toggleMouse(){
+        if(bListeningMouseEvent){
             disableMouse();
+        }else{
+            enableMouse();
         }
-        
-        void enableMouse(){
-            if(!bListeningMouseEvent){
-                //So only when it is not listening we will add a listener
-                bListeningMouseEvent = true;
-                ofAddListener(ofEvents().mouseReleased, this, &ToggleableButton::mouseReleased);
-            }
+    }
+    void mouseReleased(ofMouseEventArgs& args){
+        if(rect.inside(args.x, args.y)){
+            //just change the color to a random one
+            color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
         }
-        void disableMouse(){
-            if(bListeningMouseEvent){
-                bListeningMouseEvent = false;
-                ofRemoveListener(ofEvents().mouseReleased, this, &ToggleableButton::mouseReleased);
-            }
-        }
-        
-        //This is just a helper method.
-        void toggleMouse(){
-            if(bListeningMouseEvent){
-                disableMouse();
-            }else{
-                enableMouse();
-            }
-        }
-        void mouseReleased(ofMouseEventArgs& args){
-            if(rect.inside(args.x, args.y)){
-                //just change the color to a random one
-                color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
-            }
-        }
-        
-        void draw(){
-            ofPushStyle();
-            ofSetColor(color);
-            ofDrawRectangle(rect);
-            ofPopStyle();
-        }
-        
-        
-        bool isListeningMouseEvent(){
-            return bListeningMouseEvent;
-        }
-        
-    protected:
-        
-        //We will use this bool to check if the ofEvents are registered or not.
-        //It is protected for safety, so it cannot be modified from the outside.
-        bool bListeningMouseEvent = false;
+    }
     
-        ofRectangle rect;
-        ofColor color;
-    
-    };
+    void draw(){
+        ofPushStyle();
+        ofSetColor(color);
+        ofDrawRectangle(rect);
+        ofPopStyle();
+    }
     
     
-    class ofApp : public ofBaseApp{
+    bool isListeningMouseEvent(){
+        return bListeningMouseEvent;
+    }
     
-    	public:
-    		void setup();
-    		void update();
-    		void draw();
+protected:
     
-    		void keyPressed(int key);
-    		void keyReleased(int key);
-    		void mouseMoved(int x, int y );
-    		void mouseDragged(int x, int y, int button);
-    		void mousePressed(int x, int y, int button);
-    		void mouseReleased(int x, int y, int button);
-    		void mouseEntered(int x, int y);
-    		void mouseExited(int x, int y);
-    		void windowResized(int w, int h);
-    		void dragEvent(ofDragInfo dragInfo);
-    		void gotMessage(ofMessage msg);
-        
-            ToggleableButton button;
-    };
+    //We will use this bool to check if the ofEvents are registered or not.
+    //It is protected for safety, so it cannot be modified from the outside.
+    bool bListeningMouseEvent = false;
+
+    ofRectangle rect;
+    ofColor color;
+
+};
 
 
-ofApp.cpp
+class ofApp : public ofBaseApp{
 
+    public:
+        void setup();
+        void update();
+        void draw();
 
+        void keyPressed(int key);
+        void keyReleased(int key);
+        void mouseMoved(int x, int y );
+        void mouseDragged(int x, int y, int button);
+        void mousePressed(int x, int y, int button);
+        void mouseReleased(int x, int y, int button);
+        void mouseEntered(int x, int y);
+        void mouseExited(int x, int y);
+        void windowResized(int w, int h);
+        void dragEvent(ofDragInfo dragInfo);
+        void gotMessage(ofMessage msg);
+    
+        ToggleableButton button;
+};
+```
+
+ofApp.cpp:
+
+```cpp
     #include "ofApp.h"
     
     
@@ -751,6 +754,7 @@ ofApp.cpp
     void ofApp::windowResized(int w, int h){}
     void ofApp::gotMessage(ofMessage msg){}
     void ofApp::dragEvent(ofDragInfo dragInfo){}
+```
 
 
 
