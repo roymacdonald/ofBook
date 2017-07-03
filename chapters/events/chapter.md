@@ -972,36 +972,34 @@ public:
 
 So, to add a listener you have to call the `newListener(...)` method of the `ofEvent` you want to listen to and assign it to the `ofEventListener` object, like in the constructor of class `A`. To unregister a listener just call its `unsubscribe()` method. Look at class `A`'s `unregisterListener` method.
 
+### ofEvents and Lambda Functions
 
-### ofEvents and Lambda functions
-This new way for listening to events allows you to use lambda functions as the callback.
-If you don't know about Lambda functions read ofBook's chapter about C++11. Even though when just a section of it is about Lambda functions read the whole chapter as it describes several super useful features. 
-Lambda functions are annonymous functions. This means that you dont have to declare these previously in order to use, you are able to assign these dynamically and pass as  function argument.
+This new way for listening to events allows you to use lambda functions as the callback. If you don't know about Lambda functions see the C++11 chapter. Lambda functions are anonymous functions. You can assign them dynamically and pass them as a parameter. You don't have to have to declare them before using them. It is possible to use a lambda function as the callback of any event.
 
-It is possible to use a lambda function as the callback of any event. 
+For example, the code from the previous section using a lambda function would look like:
 
-For example, the previous code using a lambda function as the callback would be:
+```cpp
+class B {
+public:
+    void someFunction(){
+        int i = ofGetFrameNum();
+        ofNotifyEvent(intEvent, i);
+    }
+    ofEvent<int> intEvent;
+};
 
-    class B {
-	public:
-	    void someFunction(){
-			int i = ofGetFrameNum();
-	    	ofNotifyEvent(intEvent, i);
-	    }
-	    ofEvent<int> intEvent;
-	};
-	
-	class A {
-	public:
-		A(){
-			listener = myBInstance.intEvent.newListener([this](int & i){
-				cout << "new ofEvent : "<< i << endl;
-			});
-		}
-		void unregisterListener(){
-			listener.unsubscribe();
-		}		
-		B myBInstance;
-		ofEventListener listener;
-		
-	};
+class A {
+public:
+    A(){
+        listener = myBInstance.intEvent.newListener([this](int & i){
+            cout << "new ofEvent : "<< i << endl;
+        });
+    }
+    void unregisterListener(){
+        listener.unsubscribe();
+    }		
+    B myBInstance;
+    ofEventListener listener;
+    
+};
+```
