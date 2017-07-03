@@ -339,119 +339,56 @@ Note: you still need to have methods defined with the appropriate names (e.g. `m
 
 Now that we've seen how to use openFrameworks core ofEvents, it is time to see how to use custom ofEvents. These all you to create an event for any purpose (e.g. an event for when a button is pressed). Let's expand the previous example so `ofApp` can be notified when the mouse is over the `SimpleEventsListener` rectangle.
 
+### Example: Mouse Over Event
 
-##### Example Code 2
-ofApp.h
+**MH: a GIF would really help make it immediately clear what the example is doing.**
 
+ofApp.h:
 
+```cpp
+#pragma once
 
-    #pragma once
-    
-    #include "ofMain.h"
-    
-    class SimpleEventsListener{
-    public:
-        SimpleEventsListener(){
-            //let's start listening to the mouseMoved ofEvent when this object gets created.
-            ofAddListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
-            //let's set the rectangle we are going to draw.
-            rect.set(200,300, 100,100);
-            
-            //let's set rectangle's color to red.
-            color = ofColor::red;
-            
-        }
-        ~SimpleEventsListener(){
-            //this is the destructor. We need to rem
-            ofRemoveListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
-        }
-        void mouseMoved(ofMouseEventArgs& args){
-            if(rect.inside(args.x, args.y)){
-    			//Instead of changing the rectangles color let's notify a message.
-    			int i = 0; // this could be any integer number.
-    			ofNotifyEvent(intEvent, i);
-            }
-        }
+#include "ofMain.h"
+
+class SimpleEventsListener{
+public:
+    SimpleEventsListener(){
+        //let's start listening to the mouseMoved ofEvent when this object gets created.
+        ofAddListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
+        //let's set the rectangle we are going to draw.
+        rect.set(200,300, 100,100);
         
-        void draw(){
-            ofPushStyle();
-            ofSetColor(color);
-            ofDrawRectangle(rect);
-            ofPopStyle();
-        }
+        //let's set rectangle's color to red.
+        color = ofColor::red;
         
-        ofEvent<int> intEvent;
-        
-    protected:
-        ofRectangle rect;
-        ofColor color;
-    
-    };
-    
-    
-    class ofApp : public ofBaseApp{
-    
-    	public:
-    		void setup();
-    		void update();
-    		void draw();
-    		void exit();
-    		void keyPressed(int key);
-    		void keyReleased(int key);
-    		void mouseMoved(int x, int y );
-    		void mouseDragged(int x, int y, int button);
-    		void mousePressed(int x, int y, int button);
-    		void mouseReleased(int x, int y, int button);
-    		void mouseEntered(int x, int y);
-    		void mouseExited(int x, int y);
-    		void windowResized(int w, int h);
-    		void dragEvent(ofDragInfo dragInfo);
-    		void gotMessage(ofMessage msg);
-        
-        	void intEventReceived(int & i);
-        
-            SimpleEventsListener eventsListener;
-    };
-    		
-
-
-ofApp.cpp
-
-
-    #include "ofApp.h"
-    
-    void ofApp::setup(){
-    	ofAddListener(eventsListener.intEvent, this, &ofApp::intEventReceived);
     }
-    void ofApp::update(){}
-    
-    void ofApp::draw(){
-        eventsListener.draw();
+    ~SimpleEventsListener(){
+        //this is the destructor. We need to rem
+        ofRemoveListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
     }
-    void ofApp::exit(){
-    	ofRemoveListener(eventsListener.intEvent, this, &ofApp::intEventReceived);
+    void mouseMoved(ofMouseEventArgs& args){
+        if(rect.inside(args.x, args.y)){
+            //Instead of changing the rectangles color let's notify a message.
+            int i = 0; // this could be any integer number.
+            ofNotifyEvent(intEvent, i);
+        }
     }
     
-    void ofApp::intEventReceived(int & i){
-    	//Let's set the background color whenever we get this event 
-    	ofSetBackgroundColor(ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255))));
+    void draw(){
+        ofPushStyle();
+        ofSetColor(color);
+        ofDrawRectangle(rect);
+        ofPopStyle();
     }
     
-    void ofApp::keyPressed(int key){}
-    void ofApp::keyReleased(int key){}
-    void ofApp::mouseMoved(int x, int y ){}
-    void ofApp::mouseDragged(int x, int y, int button){}
-    void ofApp::mousePressed(int x, int y, int button){}
-    void ofApp::mouseReleased(int x, int y, int button){}
-    void ofApp::mouseEntered(int x, int y){}
-    void ofApp::mouseExited(int x, int y){}
-    void ofApp::windowResized(int w, int h){}
-    void ofApp::gotMessage(ofMessage msg){}
-    void ofApp::dragEvent(ofDragInfo dragInfo){}
+    ofEvent<int> intEvent;
     
+protected:
+    ofRectangle rect;
+    ofColor color;
 
+};
 
-Run this example. Now when you move the mouse over the rectangle the background changes to a random color.
 
 ##### Example Code 3
 Let's take this a little bit further.
