@@ -768,149 +768,144 @@ You define the order by giving each listener a priority (an `int`) when you add 
 
 `OF_EVENT_ORDER_AFTER_APP` is a preprocessor define constant equal to 200. There are two other constants: `OF_EVENT_ORDER_BEFORE_APP` which equals zero and `OF_EVENT_ORDER_APP` which equals 100.
 
+### Event Propagation
 
-You might be wondering how this is useful. For example, if you have several objects listening to the `draw` core event you can controll which object one is drawn first and which last.
+Think of the following scenario where you have a button and an `ofEasyCam`. The button gets drawn to a certain place inside the window, and it reacts to mouse events there. At the same time, you have an `ofEasyCam` that reacts to mouse events on the whole window. When you press the button, the `ofEasyCam` will also react to the mouse interaction causing an unwanted behavior. How can we avoid this?
 
+One simple and elegant solution is to use event propagation. Event propagation allows a listener with a low priority `int` to stop all listeners with a higher priority `int` from being notified of an event. If the button's listeners have a lower priority than the `ofEasyCam` listeners, then the button can stop certain mouse events from reaching `ofEasyCam`.
 
-### Events propagation
+In all the previous examples, the callbacks have had `void` as their return type. The return type can also be `bool`. If a listener returns `true`, the event will stop propagating and any listeners that haven't already been called will not be notified.
 
-Think of the following scenario. You have a button, similar to the ones of the previous examples; it gets drawn on a certain place inside your window and it reacts to the mouse events. At the same time you have an `ofEasyCam` object that its interaction area is the whole window. When you press the button the `ofEasyCam` will also react to the mouse interaction causing an unwanted behavior. How can we avoid this? There are several different way, but most are very cumbersome to use, having redundat code and not very flexible.
-
-There is a much nicer and elegant solution. This is by stopping the event propagation. As seen before, the events have a specific order for excecuting the callbacks, defined by their priority. If a certain condition is met while a callback is runned you can stop the following callbacks from getting called. It is also super simple to code.
-
-As we've seen in all the previous examples, all the callbacks have `void` as their return type. If you change the callback return type to `bool` and you make it to return `true` the propagation will stop.
-
-The following code example will implement what was described at the begining of this part.
+The following example implements a solution to the button and `ofEasyCam` problem.
 
 If you comment out the line that says  `#define STOP_EVENT_PROPAGATION`, the mouse events will not stop propagation.
 
-ofApp.h
+**MH: the preprocessor directives here make it harder to see the core point about event propagation. I can see why you wanted them, but I would remove them. Instead, you can have a comment somewhere that says "try commenting out the `return bDragging;` lines and see what happens when you don't stop the event propagation"**
 
+ofApp.h:
 
-    #pragma once
-    #include "ofMain.h"
+```cpp
+#pragma once
+#include "ofMain.h"
+
+//Comment out the following line in order to allow event propagation.
+#define STOP_EVENT_PROPAGATION
+class DraggableRect{
+public:
     
-    //Comment out the following line in order to allow event propagation.
-    #define STOP_EVENT_PROPAGATION
-    class DraggableRect{
-    public:
-        
-        DraggableRect(){
-            rect.set(100,100, 130,100);
-            //I added all the mouse events call back just to show how handy the following function is.
-            #ifdef STOP_EVENT_PROPAGATION
-            //The ofEasyCam registers it's mouse events with OF_EVENT_ORDER_AFTER_APP, so in order 
-            //to be able to efectively stop propagation we need to make this class to register
-            //with a lower priority value; it will get called earlier, so if propagation stops the
-            //ofEasyCam will not get the notified mouse events.
-            ofRegisterMouseEvents(this,OF_EVENT_ORDER_AFTER_APP -1);
-            #else
-            ofRegisterMouseEvents(this);
-            #endif
-        }
-        ~DraggableRect(){
-            #ifdef STOP_EVENT_PROPAGATION
-            ofUnregisterMouseEvents(this,OF_EVENT_ORDER_AFTER_APP -1);
-            #else
-            ofUnregisterMouseEvents(this);
-            #endif
-        }
+    DraggableRect(){
+        rect.set(100,100, 130,100);
+        //I added all the mouse events call back just to show how handy the following function is.
         #ifdef STOP_EVENT_PROPAGATION
-        bool mouseDragged( ofMouseEventArgs & mouse ){
+        //The ofEasyCam registers it's mouse events with OF_EVENT_ORDER_AFTER_APP, so in order 
+        //to be able to efectively stop propagation we need to make this class to register
+        //with a lower priority value; it will get called earlier, so if propagation stops the
+        //ofEasyCam will not get the notified mouse events.
+        ofRegisterMouseEvents(this,OF_EVENT_ORDER_AFTER_APP -1);
         #else
-        void mouseDragged( ofMouseEventArgs & mouse ){
+        ofRegisterMouseEvents(this);
         #endif
-            
-            if(bDragging){
-                rect.x = mouse.x - offset.x;
-                rect.y = mouse.y - offset.y;
-            }
-        #ifdef STOP_EVENT_PROPAGATION
-            return bDragging;
-        #endif
-        }
-        #ifdef STOP_EVENT_PROPAGATION
-        bool mousePressed( ofMouseEventArgs & mouse ){
-        #else
-        void mousePressed( ofMouseEventArgs & mouse ){
-        #endif
-    
-            if(rect.inside(mouse)){//notice that you can pass the mouse argument directly to the ofRectangle's inside method.
-                bDragging = true;
-                offset = mouse - rect.getPosition();
-                return true;
-            }
-        #ifdef STOP_EVENT_PROPAGATION
-            return bDragging;
-        #endif
-        }
-        void mouseReleased(ofMouseEventArgs & mouse){
-            bDragging  = false;
-        }
-        //Even when the following mouse callbacks are not being used we need to have these declared because otherwise the function ofRegisterMouseEvents will not work.
-        void mouseMoved( ofMouseEventArgs & mouse ){}
-        void mouseScrolled( ofMouseEventArgs & mouse ){}
-        void mouseEntered( ofMouseEventArgs & mouse ){}
-        void mouseExited( ofMouseEventArgs & mouse ){}
-    
-        void draw(){
-            ofPushStyle();
-            ofSetColor(ofColor::red);
-            ofDrawRectangle(rect);
-            ofPopStyle();
-        }
-    
-    private:
-    
-        ofVec2f offset;// this is to avoid having a jumpy rect when we start dragging.
-    
-        bool bDragging = false;
-        ofRectangle rect;
-    
-    };
-    
-    class ofApp : public ofBaseApp{
-    
-    	public:
-    		void draw();
-    
-            DraggableRect rect;
-    		    
-            ofEasyCam cam;
-    };
-    
-
-
-
-ofApp.cpp
-
-
-    #include "ofApp.h"
-    //--------------------------------------------------------------
-    void ofApp::draw(){
-        
-        cam.begin();
-        // all that's in between cam.begin(); and cam.end(); is just to draw the magenta box with its vertices black
-        ofPushStyle();
-        ofFill();
-        ofSetColor(ofColor::darkMagenta);
-        ofDrawBox(0,0,0,100,100,100);
-        ofSetColor(30);
-        ofNoFill();
-        ofDrawBox(0,0,0,100,100,100);
-        ofPopStyle();
-        cam.end();
-        
-        rect.draw();
-    
-        stringstream msg;
-        msg << "Clic and drag over the red square to move it around." << endl;
-        msg << "Clic and drag elsewhere to move the camera, hence rotate the magenta box";
-        ofDrawBitmapStringHighlight(msg.str(), 20,20);
-    
     }
-    
+    ~DraggableRect(){
+        #ifdef STOP_EVENT_PROPAGATION
+        ofUnregisterMouseEvents(this,OF_EVENT_ORDER_AFTER_APP -1);
+        #else
+        ofUnregisterMouseEvents(this);
+        #endif
+    }
+    #ifdef STOP_EVENT_PROPAGATION
+    bool mouseDragged( ofMouseEventArgs & mouse ){
+    #else
+    void mouseDragged( ofMouseEventArgs & mouse ){
+    #endif
+        
+        if(bDragging){
+            rect.x = mouse.x - offset.x;
+            rect.y = mouse.y - offset.y;
+        }
+    #ifdef STOP_EVENT_PROPAGATION
+        return bDragging;
+    #endif
+    }
+    #ifdef STOP_EVENT_PROPAGATION
+    bool mousePressed( ofMouseEventArgs & mouse ){
+    #else
+    void mousePressed( ofMouseEventArgs & mouse ){
+    #endif
 
+        if(rect.inside(mouse)){//notice that you can pass the mouse argument directly to the ofRectangle's inside method.
+            bDragging = true;
+            offset = mouse - rect.getPosition();
+            return true;
+        }
+    #ifdef STOP_EVENT_PROPAGATION
+        return bDragging;
+    #endif
+    }
+    void mouseReleased(ofMouseEventArgs & mouse){
+        bDragging  = false;
+    }
+    //Even when the following mouse callbacks are not being used we need to have these declared because otherwise the function ofRegisterMouseEvents will not work.
+    void mouseMoved( ofMouseEventArgs & mouse ){}
+    void mouseScrolled( ofMouseEventArgs & mouse ){}
+    void mouseEntered( ofMouseEventArgs & mouse ){}
+    void mouseExited( ofMouseEventArgs & mouse ){}
+
+    void draw(){
+        ofPushStyle();
+        ofSetColor(ofColor::red);
+        ofDrawRectangle(rect);
+        ofPopStyle();
+    }
+
+private:
+
+    ofVec2f offset;// this is to avoid having a jumpy rect when we start dragging.
+
+    bool bDragging = false;
+    ofRectangle rect;
+
+};
+
+class ofApp : public ofBaseApp{
+
+    public:
+        void draw();
+
+        DraggableRect rect;
+            
+        ofEasyCam cam;
+};
+```
+
+ofApp.cpp:
+
+```cpp
+#include "ofApp.h"
+//--------------------------------------------------------------
+void ofApp::draw(){
+    
+    cam.begin();
+    // all that's in between cam.begin(); and cam.end(); is just to draw the magenta box with its vertices black
+    ofPushStyle();
+    ofFill();
+    ofSetColor(ofColor::darkMagenta);
+    ofDrawBox(0,0,0,100,100,100);
+    ofSetColor(30);
+    ofNoFill();
+    ofDrawBox(0,0,0,100,100,100);
+    ofPopStyle();
+    cam.end();
+    
+    rect.draw();
+
+    stringstream msg;
+    msg << "Clic and drag over the red square to move it around." << endl;
+    msg << "Clic and drag elsewhere to move the camera, hence rotate the magenta box";
+    ofDrawBitmapStringHighlight(msg.str(), 20,20);
+
+}
+```
 
 ### static ofEvents
 
