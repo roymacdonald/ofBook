@@ -337,8 +337,7 @@ Note: you still need to have methods defined with the appropriate names (e.g. `m
 
 ## Custom Events
 
-As we have already seen how to use openFrameworks core ofEvents it is time to see how to use custom ofEvents.
-Let's expand/modify a litle bit the previous example so `ofApp` reacts when the `SimpleEventsListener` object sends when the mouse is over its rectangle.
+Now that we've seen how to use openFrameworks core ofEvents, it is time to see how to use custom ofEvents. These all you to create an event for any purpose (e.g. an event for when a button is pressed). Let's expand the previous example so `ofApp` can be notified when the mouse is over the `SimpleEventsListener` rectangle.
 
 
 ##### Example Code 2
