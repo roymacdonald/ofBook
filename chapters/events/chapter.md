@@ -53,12 +53,12 @@ Notice that the ofEvent type goes in between `ofEvent<` and `>`. Let's call this
 ### The Callback
 
 The callback function or method can be anywhere in your code, usually in a different class. It can be a class-member (method) or non-class-member function. It needs to have a single parameter, a reference to a variable whose type matches the event's associated type. A callback for the `intEvent` of the previous class `B` would look something like:
-	
+
 ```cpp
 void myCallBackFunction(int & i){// this is the callback method.
 
     //Here you write what you want to do when this ofEvent is received.
-    //Probably using the passed argument, setting up a flag or calling some 
+    //Probably using the passed argument, setting up a flag or calling some
     //other functions or methods. In this example we will just print to the console.
     cout << "new ofEvent : "<< i << endl;
 }
@@ -91,38 +91,38 @@ public:
 class A {
 public:
     A(){// this is the class constructor.
-    
-        //Here we will register our listener just for simplicity but you could 
+
+        //Here we will register our listener just for simplicity but you could
         //do this whenever you need to.
         ofAddListener(myBInstance.intEvent, this, &A::myCallBackFunction);
     }
     ~A(){// this is the class destructor.
-        
+
         //We will unregister from the ofEvent when this object gets destroyed.
         ofRemoveListener(myBInstance.intEvent, this, &A::myCallBackFunction);
     }
-    
+
     void myCallBackFunction(int & i){// this is the callback method.
-    
+
         //Here you write what you want to do when this ofEvent is received.
-        //Probably using the passed argument, setting up a flag or calling some 
+        //Probably using the passed argument, setting up a flag or calling some
         //other functions or methods. In this example we will just print to the console.
         cout << "new ofEvent : "<< i << endl;
     }
-    
+
     B myBInstance;//This is the instance of B that we want to listen to.
-    
+
     // anything else that this class need for working.
 
     //The following are needed in order to comply with the rule of 3 (or 5)
     //because this class has an explicitly declared destructor.
     //Read about the rule of 3 (or 5) towards the end of this chapter
-    
+
     A(const A &) =default;//default copy constructor
     A & operator=(const A &) =default;//default copy assignment operator
     A & operator=(A &&) =default;//default move assignment operator
     A(A &&) =default;//default move constructor
-    
+
 };
 ```
 
@@ -190,22 +190,22 @@ You'll notice that these ofEvents have the same name as the default functions th
 
 **MH: a picture or GIF would really help make it immediately clear what the example is doing.**
 
-Make a new empty project with the project generator and put the following in `ofApp.h`:
+Open the Color_changing_rectangle_example `chapters/events/code/`
+[TODO: link to instructions for generating the examples using project generator].
+
+This is the SimpleEventsListener.h file
 
 ```cpp
-#pragma once
-#include "ofMain.h"
-
-//This class is so simple and short that there's no need to make a new file for it.
+//This class is so simple and short that there's no need to make a .cpp file for it.
 class SimpleEventsListener{
 public:
-    SimpleEventsListener(){
+    SimpleEventsListener(){//this is the class constructor
         //let's start listening to the mouseMoved ofEvent when this object gets created.
         ofAddListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
         //let's set the rectangle we are going to draw.
         rect.set(200,300, 100,100);
     }
-    ~SimpleEventsListener(){
+    ~SimpleEventsListener(){//this is the class destructor
         //this is the destructor. We need to rem
         ofRemoveListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
     }
@@ -215,21 +215,28 @@ public:
             color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
         }
     }
-    
+
     void draw(){
         ofPushStyle();
         ofSetColor(color);
         ofDrawRectangle(rect);
         ofPopStyle();
     }
-    
-    
+
+
 protected:
     ofRectangle rect;
     ofColor color;
 
 };
 
+```
+ofApp.h:
+
+```cpp
+#pragma once
+#include "ofMain.h"
+#include "SimpleEventsListener.h"
 
 class ofApp : public ofBaseApp{
 
@@ -238,19 +245,6 @@ class ofApp : public ofBaseApp{
         void update();
         void draw();
 
-        void keyPressed(int key);
-        void keyReleased(int key);
-        void mouseMoved(int x, int y );
-        void mouseDragged(int x, int y, int button);
-        void mousePressed(int x, int y, int button);
-        void mouseReleased(int x, int y, int button);
-        void mouseEntered(int x, int y);
-        void mouseExited(int x, int y);
-        void windowResized(int w, int h);
-        void dragEvent(ofDragInfo dragInfo);
-        void gotMessage(ofMessage msg);
-    
-    
         SimpleEventsListener eventsListener;
 };
 ```
@@ -266,17 +260,6 @@ void ofApp::update(){}
 void ofApp::draw(){
     eventsListener.draw();
 }
-void ofApp::keyPressed(int key){}
-void ofApp::keyReleased(int key){}
-void ofApp::mouseMoved(int x, int y ){}
-void ofApp::mouseDragged(int x, int y, int button){}
-void ofApp::mousePressed(int x, int y, int button){}
-void ofApp::mouseReleased(int x, int y, int button){}
-void ofApp::mouseEntered(int x, int y){}
-void ofApp::mouseExited(int x, int y){}
-void ofApp::windowResized(int w, int h){}
-void ofApp::gotMessage(ofMessage msg){}
-void ofApp::dragEvent(ofDragInfo dragInfo){}
 ```
 
 Compile and run it. Move the mouse over the rectangle, and you will see the rectangle changes to a random color. Not very impressive but notice that there's nothing else but the `eventsListener.draw();` call in the `ofApp.cpp` file. This means `ofApp` does not have to worry about whatever `eventsListener` is doing. This makes `SimpleEventsListener` and `ofApp` independent of one another, meaning that you could be able to have another `SimpleEventsListener` object anywhere else and expect the same behavior. Try to expand this example and make a button class.
@@ -343,28 +326,27 @@ Now that we've seen how to use openFrameworks core ofEvents, it is time to see h
 
 **MH: a GIF would really help make it immediately clear what the example is doing.**
 
-ofApp.h:
+MouseOverListener.h
 
 ```cpp
 #pragma once
-
 #include "ofMain.h"
 
-class SimpleEventsListener{
+class MouseOverListener{
 public:
-    SimpleEventsListener(){
+    MouseOverListener(){
         //let's start listening to the mouseMoved ofEvent when this object gets created.
-        ofAddListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
+        ofAddListener(ofEvents().mouseMoved, this, &MouseOverListener::mouseMoved);
         //let's set the rectangle we are going to draw.
         rect.set(200,300, 100,100);
-        
+
         //let's set rectangle's color to red.
         color = ofColor::red;
-        
+
     }
-    ~SimpleEventsListener(){
+    ~MouseOverListener(){
         //this is the destructor. We need to rem
-        ofRemoveListener(ofEvents().mouseMoved, this, &SimpleEventsListener::mouseMoved);
+        ofRemoveListener(ofEvents().mouseMoved, this, &MouseOverListener::mouseMoved);
     }
     void mouseMoved(ofMouseEventArgs& args){
         if(rect.inside(args.x, args.y)){
@@ -373,22 +355,30 @@ public:
             ofNotifyEvent(intEvent, i);
         }
     }
-    
+
     void draw(){
         ofPushStyle();
         ofSetColor(color);
         ofDrawRectangle(rect);
         ofPopStyle();
     }
-    
+
     ofEvent<int> intEvent;
-    
+
 protected:
     ofRectangle rect;
     ofColor color;
 
 };
+```
 
+ofApp.h:
+
+```cpp
+#pragma once
+
+#include "ofMain.h"
+#include "MouseOverListener.h"
 
 class ofApp : public ofBaseApp{
 
@@ -396,28 +386,18 @@ class ofApp : public ofBaseApp{
         void setup();
         void update();
         void draw();
-        void exit();
-        void keyPressed(int key);
-        void keyReleased(int key);
-        void mouseMoved(int x, int y );
-        void mouseDragged(int x, int y, int button);
-        void mousePressed(int x, int y, int button);
-        void mouseReleased(int x, int y, int button);
-        void mouseEntered(int x, int y);
-        void mouseExited(int x, int y);
-        void windowResized(int w, int h);
-        void dragEvent(ofDragInfo dragInfo);
-        void gotMessage(ofMessage msg);
-    
+        void exit(); 
+
         void intEventReceived(int & i);
-    
-        SimpleEventsListener eventsListener;
+
+        MouseOverListener eventsListener;
 };
 ```
 
 ofApp.cpp:
 
 ```cpp
+
 #include "ofApp.h"
 
 void ofApp::setup(){
@@ -433,23 +413,10 @@ void ofApp::exit(){
 }
 
 void ofApp::intEventReceived(int & i){
-    //Let's set the background color whenever we get this event 
+    //Let's set the background color whenever we get this event
     ofSetBackgroundColor(ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255))));
 }
-
-void ofApp::keyPressed(int key){}
-void ofApp::keyReleased(int key){}
-void ofApp::mouseMoved(int x, int y ){}
-void ofApp::mouseDragged(int x, int y, int button){}
-void ofApp::mousePressed(int x, int y, int button){}
-void ofApp::mouseReleased(int x, int y, int button){}
-void ofApp::mouseEntered(int x, int y){}
-void ofApp::mouseExited(int x, int y){}
-void ofApp::windowResized(int w, int h){}
-void ofApp::gotMessage(ofMessage msg){}
-void ofApp::dragEvent(ofDragInfo dragInfo){}
 ```
-
 Run this example. When you move the mouse over the rectangle, the background of the app changes to a random color.
 
 ### Example: Many Buttons
@@ -458,13 +425,11 @@ Run this example. When you move the mouse over the rectangle, the background of 
 
 Let's take this a little bit further.
 
-ofApp.h:
+RandomColorButton.h:
 
 ```cpp
 #pragma once
-
 #include "ofMain.h"
-
 
 class RandomColorButton{
 public:
@@ -473,7 +438,7 @@ public:
         ofAddListener(ofEvents().mouseReleased, this, &RandomColorButton::mouseReleased);
         //Also we will listen to the draw ofEvent so this class draws by itself.
         ofAddListener(ofEvents().draw, this, &RandomColorButton::draw);
-        
+
         //let's set the rectangle we are going to draw to a random size and position.
         //Instead of calling ofRandom directly inside rect.set() the following code avoids that
         //the rectangle falls out of the window.
@@ -482,10 +447,10 @@ public:
         float x = ofRandom(ofGetWidth() - w);
         float y = ofRandom(ofGetHeight() - h);
         rect.set(x,y,w,h);
-        
+
         //let's set rectangle's color to a random color
         color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
-        
+
     }
     ~RandomColorButton(){
         //this is the destructor. We need to rem
@@ -499,22 +464,29 @@ public:
             ofNotifyEvent(colorEvent, color);
         }
     }
-    
+
     void draw(ofEventArgs&){
         ofPushStyle();
         ofSetColor(color);
         ofDrawRectangle(rect);
         ofPopStyle();
     }
-    
+
     ofEvent<ofColor> colorEvent;
-    
+
 protected:
     ofRectangle rect;
     ofColor color;
 
 };
 
+```
+ofApp.h:
+
+```cpp
+#pragma once
+#include "ofMain.h"
+#include "RandomColorButton.h"
 
 class ofApp : public ofBaseApp{
 
@@ -524,23 +496,13 @@ class ofApp : public ofBaseApp{
         void draw();
         void exit();
 
-        void keyPressed(int key);
-        void keyReleased(int key);
-        void mouseMoved(int x, int y );
-        void mouseDragged(int x, int y, int button);
-        void mousePressed(int x, int y, int button);
-        void mouseReleased(int x, int y, int button);
-        void mouseEntered(int x, int y);
-        void mouseExited(int x, int y);
-        void windowResized(int w, int h);
-        void dragEvent(ofDragInfo dragInfo);
-        void gotMessage(ofMessage msg);
-    
         // This is the callback method. Notice that it's argument is an ofColor which matches the RandomColorButton ofEvent.
         void colorEventReceived(ofColor & color);
-    
+
+        //This will be the collection of buttons
         vector<RandomColorButton> buttons;
 };
+
 ```
 
 ofApp.cpp:
@@ -548,10 +510,10 @@ ofApp.cpp:
 ```cpp
 #include "ofApp.h"
 
-
 void ofApp::setup(){
     //Make 100 buttons
     buttons.resize(100);
+    //add the listeners for each button
     for(int i = 0; i < buttons.size(); i++){
         ofAddListener(buttons[i].colorEvent, this, &ofApp::colorEventReceived);
     }
@@ -573,18 +535,6 @@ void ofApp::colorEventReceived(ofColor & color){
     //Let's set the background color to the one sent in the received event
     ofSetBackgroundColor(color);
 }
-//--------------------------------------------------------------
-void ofApp::keyPressed(int key){}
-void ofApp::keyReleased(int key){}
-void ofApp::mouseMoved(int x, int y ){}
-void ofApp::mouseDragged(int x, int y, int button){}
-void ofApp::mousePressed(int x, int y, int button){}
-void ofApp::mouseReleased(int x, int y, int button){}
-void ofApp::mouseEntered(int x, int y){}
-void ofApp::mouseExited(int x, int y){}
-void ofApp::windowResized(int w, int h){}
-void ofApp::gotMessage(ofMessage msg){}
-void ofApp::dragEvent(ofDragInfo dragInfo){}
 ```
 
 Run this code and see what happens. **MH: describe the example**
@@ -617,13 +567,11 @@ In all the previous examples we were adding and removing the listeners when the 
 
 Notice what's going on in the `enableMouse()` and `disableMouse()` methods of `ToggleableButton`.
 
-ofApp.h:
+ToggleableButton.h:
 
 ```cpp
 #pragma once
-
 #include "ofMain.h"
-
 
 class ToggleableButton{
 public:
@@ -635,7 +583,7 @@ public:
         //this is the destructor.
         disableMouse();
     }
-    
+
     void enableMouse(){
         if(!bListeningMouseEvent){
             //So only when it is not listening we will add a listener
@@ -649,7 +597,7 @@ public:
             ofRemoveListener(ofEvents().mouseReleased, this, &ToggleableButton::mouseReleased);
         }
     }
-    
+
     //This is just a helper method.
     void toggleMouse(){
         if(bListeningMouseEvent){
@@ -664,21 +612,21 @@ public:
             color = ofColor((int)floor(ofRandom(255)),(int)floor(ofRandom(255)),(int)floor(ofRandom(255)));
         }
     }
-    
+
     void draw(){
         ofPushStyle();
         ofSetColor(color);
         ofDrawRectangle(rect);
         ofPopStyle();
     }
-    
-    
+
+
     bool isListeningMouseEvent(){
         return bListeningMouseEvent;
     }
-    
+
 protected:
-    
+
     //We will use this bool to check if the ofEvents are registered or not.
     //It is protected for safety, so it cannot be modified from the outside.
     bool bListeningMouseEvent = false;
@@ -687,7 +635,14 @@ protected:
     ofColor color;
 
 };
+```
 
+ofApp.h:
+
+```cpp
+#pragma once
+
+#include "ofMain.h"
 
 class ofApp : public ofBaseApp{
 
@@ -696,18 +651,8 @@ class ofApp : public ofBaseApp{
         void update();
         void draw();
 
-        void keyPressed(int key);
         void keyReleased(int key);
-        void mouseMoved(int x, int y );
-        void mouseDragged(int x, int y, int button);
-        void mousePressed(int x, int y, int button);
-        void mouseReleased(int x, int y, int button);
-        void mouseEntered(int x, int y);
-        void mouseExited(int x, int y);
-        void windowResized(int w, int h);
-        void dragEvent(ofDragInfo dragInfo);
-        void gotMessage(ofMessage msg);
-    
+        
         ToggleableButton button;
 };
 ```
@@ -715,45 +660,33 @@ class ofApp : public ofBaseApp{
 ofApp.cpp:
 
 ```cpp
-    #include "ofApp.h"
-    
-    
-    void ofApp::setup(){}
+ #include "ofApp.h"
+
+void ofApp::setup(){}
     //--------------------------------------------------------------
-    void ofApp::update(){}
+void ofApp::update(){}
     //--------------------------------------------------------------
-    void ofApp::draw(){
-        button.draw();
-        
-        stringstream msg;
-        msg << "Press the spacebar to enable/disable (toggle) the button" << endl;
-        msg << "Clic inside the colored rectangle (the button)." << endl;
-        msg << "If it is listening to the mouse it will change its color to a random one" << endl;
-        msg << endl << "Button is ";
-        if(!button.isListeningMouseEvent()){
-            msg << "NOT ";
-        }
-        msg << "listening to mouse.";
-        
-        ofDrawBitmapStringHighlight(msg.str(), 100,100);
+void ofApp::draw(){
+    button.draw();
+
+    stringstream msg;
+    msg << "Press the spacebar to enable/disable (toggle) the button" << endl;
+    msg << "Clic inside the colored rectangle (the button)." << endl;
+    msg << "If it is listening to the mouse it will change its color to a random one" << endl;
+    msg << endl << "Button is ";
+    if(!button.isListeningMouseEvent()){
+        msg << "NOT ";
     }
+    msg << "listening to mouse.";
+
+    ofDrawBitmapStringHighlight(msg.str(), 100,100);
+}
     //--------------------------------------------------------------
-    void ofApp::keyReleased(int key){
-        if (key == ' ') {
-            button.toggleMouse();
-        }
+void ofApp::keyReleased(int key){
+    if (key == ' ') {
+        button.toggleMouse();
     }
-    //--------------------------------------------------------------
-    void ofApp::keyPressed(int key){}
-    void ofApp::mouseMoved(int x, int y ){}
-    void ofApp::mouseDragged(int x, int y, int button){}
-    void ofApp::mousePressed(int x, int y, int button){}
-    void ofApp::mouseReleased(int x, int y, int button){}
-    void ofApp::mouseEntered(int x, int y){}
-    void ofApp::mouseExited(int x, int y){}
-    void ofApp::windowResized(int w, int h){}
-    void ofApp::gotMessage(ofMessage msg){}
-    void ofApp::dragEvent(ofDragInfo dragInfo){}
+}
 ```
 
 ## ofEvent Advanced Features
@@ -792,12 +725,12 @@ ofApp.h:
 #define STOP_EVENT_PROPAGATION
 class DraggableRect{
 public:
-    
+
     DraggableRect(){
         rect.set(100,100, 130,100);
         //I added all the mouse events call back just to show how handy the following function is.
         #ifdef STOP_EVENT_PROPAGATION
-        //The ofEasyCam registers it's mouse events with OF_EVENT_ORDER_AFTER_APP, so in order 
+        //The ofEasyCam registers it's mouse events with OF_EVENT_ORDER_AFTER_APP, so in order
         //to be able to efectively stop propagation we need to make this class to register
         //with a lower priority value; it will get called earlier, so if propagation stops the
         //ofEasyCam will not get the notified mouse events.
@@ -818,7 +751,7 @@ public:
     #else
     void mouseDragged( ofMouseEventArgs & mouse ){
     #endif
-        
+
         if(bDragging){
             rect.x = mouse.x - offset.x;
             rect.y = mouse.y - offset.y;
@@ -873,7 +806,7 @@ class ofApp : public ofBaseApp{
         void draw();
 
         DraggableRect rect;
-            
+
         ofEasyCam cam;
 };
 ```
@@ -884,7 +817,7 @@ ofApp.cpp:
 #include "ofApp.h"
 //--------------------------------------------------------------
 void ofApp::draw(){
-    
+
     cam.begin();
     // all that's in between cam.begin(); and cam.end(); is just to draw the magenta box with its vertices black
     ofPushStyle();
@@ -896,7 +829,7 @@ void ofApp::draw(){
     ofDrawBox(0,0,0,100,100,100);
     ofPopStyle();
     cam.end();
-    
+
     rect.draw();
 
     stringstream msg;
@@ -918,7 +851,7 @@ You can have static ofEvents. This can become useful in several situations. Take
 
 ## The Rule of 3 (or 5)
 
-In C++ there is a rule, called the rule of 3, which became the rule of 5 in C++11. Read about it [here](https://en.wikipedia.org/wiki/Rule_of_three_(C%2B%2B_programming)). In short, it says that if you one of the following methods to a class, you must add all of them: 
+In C++ there is a rule, called the rule of 3, which became the rule of 5 in C++11. Read about it [here](https://en.wikipedia.org/wiki/Rule_of_three_(C%2B%2B_programming)). In short, it says that if you one of the following methods to a class, you must add all of them:
 
 *  destructor `~ClassName(){...}`
 *  copy constructor `ClassName(ClassName& other)`
@@ -957,7 +890,7 @@ public:
     }
     //There's no need to have a class destructor, because when the listener is destroyed
     //it will automatically unregister itself.
-    
+
     void myCallBackFunction(int & i){// this is the callback method.
         cout << "new ofEvent : "<< i << endl;
     }
@@ -966,7 +899,7 @@ public:
     }		
     B myBInstance;
     ofEventListener listener;
-    
+
 };
 ```
 
@@ -1000,6 +933,6 @@ public:
     }		
     B myBInstance;
     ofEventListener listener;
-    
+
 };
 ```
