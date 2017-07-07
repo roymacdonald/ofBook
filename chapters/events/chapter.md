@@ -29,12 +29,12 @@ There are two parts to using the openFrameworks event system: an **`ofEvent` ins
 
 The `ofEvent` instance is a subject that can be listened to by other parts of your code. If you make this `ofEvent` object public, any other class will be able to access it and add a listener. If you make it private only other objects of the same class will be able to listen to the event.
 
-ofEvents are like messages so these usually will involve passing some information when an event is triggered. In C++, this information needs to be specified with a type. This can be something simple like an `int` or it could be a custom class. The ofEvent and the callback both need to have the same type specified.
+ofEvents are like messages so these usually will involve passing some information when an event is triggered. In C++, this information needs to be specified with a type. This can be something simple like an `int` or a custom class or even it could be void.  The ofEvent and the callback both need to have the same type specified.
 
-For example, we can have a class called `B` that has an ofEvent that  will send an `int`. Something like:
+For example, we can have a class called `EventSender` that has an ofEvent that  will send an `int`. Something like:
 
 ```cpp
-class B {
+class EventSender {
 public:
     //whatever else stuff of this class.
     void someFunction(){
@@ -45,39 +45,55 @@ public:
     ofEvent<int> intEvent;
 };
 ```
-
-**MH: I would use a more descriptive name other than B for the class, e.g. FrameRateSubject**
 
 Notice that the ofEvent type goes in between `ofEvent<` and `>`. Let's call this the ofEvent's associated type.
 
 ### The Callback
 
-The callback function or method can be anywhere in your code, usually in a different class. It can be a class-member (method) or non-class-member function. It needs to have a single parameter, a reference to a variable whose type matches the event's associated type. A callback for the `intEvent` of the previous class `B` would look something like:
+The callback function or method can be anywhere in your code, usually in a different class. It can be a class-member (method) or non-class-member function. It needs to have a single parameter, a reference to a variable whose type matches the event's associated type. A callback for the `intEvent` of the previous class `EventSender` would look something like:
 
 ```cpp
-void myCallBackFunction(int & i){// this is the callback method.
+void myCallBackFunction(int & frameNum){// this is the callback method.
 
     //Here you write what you want to do when this ofEvent is received.
     //Probably using the passed argument, setting up a flag or calling some
     //other functions or methods. In this example we will just print to the console.
-    cout << "new ofEvent : "<< i << endl;
+    cout << "new ofEvent : "<< frameNum << endl;
 }
 ```
-
-**MH: Might help to use a more descriptive variable name - e.g. `frameNum` - for the parameter**
 
 Notice that the callback's parameter type matches the ofEvents associated type - e.g. `ofEvent<int>`. Also notice the `&` that follows the type in the callback. This `&` means that the argument is passed as reference. This is necessary, and without it, the code won't work. For more information, check out [this section](https://github.com/openframeworks/ofBook/blob/master/chapters/cplusplus_basics/unabridged.md#dynamic-allocation-and-pointers) of the unabridged "C++ Language Basics" chapter.
 
 **MH: added a link to the C++ basics chapter that deals with references, but I would recommend linking to an additional, external C++ tutorial.**
 
+### ofEvent<void>
+
+As said, the ofEvent associated type can be `void`, meaning that no information is sent along. You declare such as:
+
+```cpp
+ofEvent<void> voidEvent;
+```
+
+The callback function needs no arguments, like:
+
+```cpp
+void theCallbackFunction(){}
+```
+
+And for sending this event you call
+
+```cpp
+ofNotifyEvent(voidEvent);
+```
+
 ### Adding and Removing Listeners
 
 In order to make a callback function react to an ofEvent's notifications, we need to register them together. For registering and unregistering, you use [`ofAddListener(...)`](http://openframeworks.cc/documentation/events/ofEventUtils/#!show_ofAddListener) and [`ofRemoveListener(...)`](http://openframeworks.cc/documentation/events/ofEventUtils/#!show_ofRemoveListener) respectively.
 
-For example, let's declare a class called `A` that will have a callback function. Just for the sake of simplicity, let's make `A` the owner of the `B` instance that we want to listen to.
+For example, let's declare a class called `EventListener` that will have a callback function. Just for the sake of simplicity, let's make `EventListener` the owner of the `EventSender` instance that we want to listen to.
 
 ```cpp
-class B {
+class EventSender {
 public:
     //whatever else stuff of this class.
     void someFunction(){
@@ -88,18 +104,18 @@ public:
     ofEvent<int> intEvent;
 };
 
-class A {
+class EventListener {
 public:
-    A(){// this is the class constructor.
+    EventListener(){// this is the class constructor.
 
         //Here we will register our listener just for simplicity but you could
         //do this whenever you need to.
-        ofAddListener(myBInstance.intEvent, this, &A::myCallBackFunction);
+        ofAddListener(myEventSenderInstance.intEvent, this, &EventListener::myCallBackFunction);
     }
-    ~A(){// this is the class destructor.
+    ~EventListener(){// this is the class destructor.
 
         //We will unregister from the ofEvent when this object gets destroyed.
-        ofRemoveListener(myBInstance.intEvent, this, &A::myCallBackFunction);
+        ofRemoveListener(myEventSenderInstance.intEvent, this, &EventListener::myCallBackFunction);
     }
 
     void myCallBackFunction(int & i){// this is the callback method.
@@ -110,7 +126,7 @@ public:
         cout << "new ofEvent : "<< i << endl;
     }
 
-    B myBInstance;//This is the instance of B that we want to listen to.
+    EventSender myEventSenderInstance;//This is the instance of EventSender that we want to listen to.
 
     // anything else that this class need for working.
 
@@ -118,30 +134,28 @@ public:
     //because this class has an explicitly declared destructor.
     //Read about the rule of 3 (or 5) towards the end of this chapter
 
-    A(const A &) =default;//default copy constructor
-    A & operator=(const A &) =default;//default copy assignment operator
-    A & operator=(A &&) =default;//default move assignment operator
-    A(A &&) =default;//default move constructor
+    EventListener(const EventListener &) =default;//default copy constructor
+    EventListener & operator=(const EventListener &) =default;//default copy assignment operator
+    EventListener & operator=(EventListener &&) =default;//default move assignment operator
+    EventListener(EventListener &&) =default;//default move constructor
 
 };
 ```
 
-**MH: I would steer clear of using the abstract "A" and "B" for class names. Maybe try "FrameSubject" and "FrameListener"**
-
 The arguments passed in to `ofAddListener` and `ofRemoveListener` are the same, these are:
 
 ```cpp
-ofAddListener(myBInstance.intEvent, // this is the instance of the ofEvent that we want to listen to.
+ofAddListener(myEventSenderInstance.intEvent, // this is the instance of the ofEvent that we want to listen to.
                 this, // this is the pointer to the object that has the callback.
-                &A::myCallBackFunction // this is the pointer to the callback.
+                & EventListener::myCallBackFunction // this is the pointer to the callback.
                 );
 ```
 
 Here is what these arguments mean:
 
-* `myBInstance.intEvent` is the ofEvent you want to listen to.
+* `myEventSenderInstance.intEvent` is the ofEvent you want to listen to.
 * `this` could be a bit confusing for newcomers. If you don't know what it means see this resource. [TODO: Put link to adequate resource.]
-* `&B::myCallBackFunction` has two important parts. `B::myCallBackFunction` means find the function `myCallBackFunction` that is a member of the `B` class. The `&` is the "address-of" operator that allows us to find the memory address of the function. Read here [TODO: Put link to adequate resource.] about pointers and references if you don't know what it means.
+* `&EventListener::myCallBackFunction` has two important parts. `EventListener::myCallBackFunction` means find the function `myCallBackFunction` that is a member of the `EventListener` class. The `&` is the "address-of" operator that allows us to find the memory address of the function. Read [this section](https://github.com/openframeworks/ofBook/blob/master/chapters/cplusplus_basics/unabridged.md#dynamic-allocation-and-pointers) about pointers and references if you don't know what it means.
 
 To stop a callback function from reacting to an ofEvent, we must unregister it. Use `ofRemoveListener`, passing in the exact same arguments you passed in to `ofAddListener`.
 
@@ -537,25 +551,9 @@ void ofApp::colorEventReceived(ofColor & color){
 }
 ```
 
-Run this code and see what happens. **MH: describe the example**
+Run this code. This will create 100 randomly positioned, sized and colored rectangles. If you clic any rectangle the app's background will change to the color of the clicked rectangle. This is a very basic self-contained button.
+Can you expand it to make a fully functional button?
 
-### ofEvent<void>
-
-**MH: I would move this section earlier so that your initial rectangle example can use void instead of int (since the int is not being used for anything).**
-
-You can have ofEvents that don't send any additional data. If you declare an ofEvent as:
-
-```cpp
-ofEvent<void> voidEvent;
-```
-
-A listener would need a callback function with no arguments:
-
-```cpp
-void theCallbackFunction(){}
-```
-
-Then you can trigger an event with: `ofNotifyEvent(voidEvent);`
 
 ## Dynamically Starting and Stopping Listening
 
@@ -703,82 +701,64 @@ You define the order by giving each listener a priority (an `int`) when you add 
 
 ### Event Propagation
 
-Think of the following scenario where you have a button and an `ofEasyCam`. The button gets drawn to a certain place inside the window, and it reacts to mouse events there. At the same time, you have an `ofEasyCam` that reacts to mouse events on the whole window. When you press the button, the `ofEasyCam` will also react to the mouse interaction causing an unwanted behavior. How can we avoid this?
+Think of the following scenario where you have a button and an `ofEasyCam`. The button gets drawn to a certain place inside the window, and it reacts to mouse events there. At the same time, you have an `ofEasyCam` that reacts to mouse events on the whole window. When you press the button, the `ofEasyCam` will also react to the mouse interaction causing an unwanted behavior. 
+
+There is an example in the code folder named `No_Propagation_Example` which depicts the scenario just mentioned.
+
+How can we avoid this undesired behavior?
 
 One simple and elegant solution is to use event propagation. Event propagation allows a listener with a low priority `int` to stop all listeners with a higher priority `int` from being notified of an event. If the button's listeners have a lower priority than the `ofEasyCam` listeners, then the button can stop certain mouse events from reaching `ofEasyCam`.
 
-In all the previous examples, the callbacks have had `void` as their return type. The return type can also be `bool`. If a listener returns `true`, the event will stop propagating and any listeners that haven't already been called will not be notified.
+In all the previous examples, the callbacks have had `void` as their return type. In order to be able to deal with the event propagation the callback's return type needs to be of type `bool`. When the callback returns `true`, the event will stop propagating and any listeners that haven't already been called will not be notified.
 
 The following example implements a solution to the button and `ofEasyCam` problem.
+The important piece of code is in the following file/class. Notice how the event order is super important in order to use the event propagation successfully.
 
-If you comment out the line that says  `#define STOP_EVENT_PROPAGATION`, the mouse events will not stop propagation.
 
-**MH: the preprocessor directives here make it harder to see the core point about event propagation. I can see why you wanted them, but I would remove them. Instead, you can have a comment somewhere that says "try commenting out the `return bDragging;` lines and see what happens when you don't stop the event propagation"**
-
-ofApp.h:
+DraggableRect.h:
 
 ```cpp
 #pragma once
 #include "ofMain.h"
 
-//Comment out the following line in order to allow event propagation.
-#define STOP_EVENT_PROPAGATION
 class DraggableRect{
 public:
 
     DraggableRect(){
         rect.set(100,100, 130,100);
         //I added all the mouse events call back just to show how handy the following function is.
-        #ifdef STOP_EVENT_PROPAGATION
+
         //The ofEasyCam registers it's mouse events with OF_EVENT_ORDER_AFTER_APP, so in order
         //to be able to efectively stop propagation we need to make this class to register
         //with a lower priority value; it will get called earlier, so if propagation stops the
         //ofEasyCam will not get the notified mouse events.
         ofRegisterMouseEvents(this,OF_EVENT_ORDER_AFTER_APP -1);
-        #else
-        ofRegisterMouseEvents(this);
-        #endif
     }
     ~DraggableRect(){
-        #ifdef STOP_EVENT_PROPAGATION
         ofUnregisterMouseEvents(this,OF_EVENT_ORDER_AFTER_APP -1);
-        #else
-        ofUnregisterMouseEvents(this);
-        #endif
     }
-    #ifdef STOP_EVENT_PROPAGATION
-    bool mouseDragged( ofMouseEventArgs & mouse ){
-    #else
-    void mouseDragged( ofMouseEventArgs & mouse ){
-    #endif
 
+    bool mouseDragged( ofMouseEventArgs & mouse ){
         if(bDragging){
             rect.x = mouse.x - offset.x;
             rect.y = mouse.y - offset.y;
         }
-    #ifdef STOP_EVENT_PROPAGATION
         return bDragging;
-    #endif
     }
-    #ifdef STOP_EVENT_PROPAGATION
-    bool mousePressed( ofMouseEventArgs & mouse ){
-    #else
-    void mousePressed( ofMouseEventArgs & mouse ){
-    #endif
 
+    bool mousePressed( ofMouseEventArgs & mouse ){
         if(rect.inside(mouse)){//notice that you can pass the mouse argument directly to the ofRectangle's inside method.
             bDragging = true;
             offset = mouse - rect.getPosition();
             return true;
         }
-    #ifdef STOP_EVENT_PROPAGATION
         return bDragging;
-    #endif
     }
     void mouseReleased(ofMouseEventArgs & mouse){
         bDragging  = false;
     }
-    //Even when the following mouse callbacks are not being used we need to have these declared because otherwise the function ofRegisterMouseEvents will not work.
+    //Even when the following mouse callbacks are not being used we need to have these declared
+    //because otherwise the function ofRegisterMouseEvents will not work.
     void mouseMoved( ofMouseEventArgs & mouse ){}
     void mouseScrolled( ofMouseEventArgs & mouse ){}
     void mouseEntered( ofMouseEventArgs & mouse ){}
@@ -799,6 +779,14 @@ private:
     ofRectangle rect;
 
 };
+```
+ofApp.h
+
+```cpp
+
+#pragma once
+#include "ofMain.h"
+#include "DraggableRect.h"
 
 class ofApp : public ofBaseApp{
 
@@ -809,13 +797,14 @@ class ofApp : public ofBaseApp{
 
         ofEasyCam cam;
 };
+
 ```
 
-ofApp.cpp:
+ofApp.cpp
 
 ```cpp
 #include "ofApp.h"
-//--------------------------------------------------------------
+
 void ofApp::draw(){
 
     cam.begin();
@@ -828,6 +817,7 @@ void ofApp::draw(){
     ofNoFill();
     ofDrawBox(0,0,0,100,100,100);
     ofPopStyle();
+    
     cam.end();
 
     rect.draw();
@@ -836,10 +826,8 @@ void ofApp::draw(){
     msg << "Clic and drag over the red square to move it around." << endl;
     msg << "Clic and drag elsewhere to move the camera, hence rotate the magenta box";
     ofDrawBitmapStringHighlight(msg.str(), 20,20);
-
 }
 ```
-
 
 ### Static ofEvents
 
