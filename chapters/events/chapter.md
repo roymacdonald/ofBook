@@ -202,9 +202,9 @@ You'll notice that these ofEvents have the same name as the default functions th
 
 ### Example: Color Changing Rectangle
 
-**MH: a picture or GIF would really help make it immediately clear what the example is doing.**
+![Color_changing_rectangle_example](images/Color_changing_rectangle_example.gif)
 
-Open the Color_changing_rectangle_example `chapters/events/code/`
+Open the `chapters/events/code/Color_changing_rectangle_example` example project. You'll need to create the project files for these using the project generator. It is super easy.
 [TODO: link to instructions for generating the examples using project generator].
 
 This is the SimpleEventsListener.h file
@@ -338,7 +338,7 @@ Now that we've seen how to use openFrameworks core ofEvents, it is time to see h
 
 ### Example: Mouse Over Event
 
-**MH: a GIF would really help make it immediately clear what the example is doing.**
+![Mouse_over_example](images/Mouse_over_example.gif)
 
 MouseOverListener.h
 
@@ -435,7 +435,7 @@ Run this example. When you move the mouse over the rectangle, the background of 
 
 ### Example: Many Buttons
 
-**MH: a GIF would really help make it immediately clear what the example is doing.**
+![Many_buttons_Example](images/Many_buttons_Example.gif)
 
 Let's take this a little bit further.
 
@@ -561,7 +561,7 @@ In all the previous examples we were adding and removing the listeners when the 
 
 ### Example: Buttons That Can Be Enabled and Disabled
 
-**MH: a GIF would really help make it immediately clear what the example is doing. It would also help to describe the example before jumping into code.**
+![Toggleable_Button_Example](images/Toggleable_Button_Example.gif)
 
 Notice what's going on in the `enableMouse()` and `disableMouse()` methods of `ToggleableButton`.
 
@@ -703,6 +703,8 @@ You define the order by giving each listener a priority (an `int`) when you add 
 
 Think of the following scenario where you have a button and an `ofEasyCam`. The button gets drawn to a certain place inside the window, and it reacts to mouse events there. At the same time, you have an `ofEasyCam` that reacts to mouse events on the whole window. When you press the button, the `ofEasyCam` will also react to the mouse interaction causing an unwanted behavior. 
 
+![](images/No_Propagation_Example.gif)
+
 There is an example in the code folder named `No_Propagation_Example` which depicts the scenario just mentioned.
 
 How can we avoid this undesired behavior?
@@ -711,9 +713,13 @@ One simple and elegant solution is to use event propagation. Event propagation a
 
 In all the previous examples, the callbacks have had `void` as their return type. In order to be able to deal with the event propagation the callback's return type needs to be of type `bool`. When the callback returns `true`, the event will stop propagating and any listeners that haven't already been called will not be notified.
 
-The following example implements a solution to the button and `ofEasyCam` problem.
-The important piece of code is in the following file/class. Notice how the event order is super important in order to use the event propagation successfully.
+### Example: Event Propagation
 
+This example implements a solution to the button and `ofEasyCam` problem.
+
+![](images/Propagation_Example.gif)
+
+The important piece of code is in the following file/class. Notice that event order is super important for using events propagation successfully.
 
 DraggableRect.h:
 
@@ -828,6 +834,9 @@ void ofApp::draw(){
     ofDrawBitmapStringHighlight(msg.str(), 20,20);
 }
 ```
+
+Run this code and see how it behaves. Also run it side by side with the `No_Propagation_Example`. Compare the `DraggableRect.h` file of both `Propagation_Example` and `No_Propagation_Example`. You'll see that the difference is just the event priority that's given when adding/removing the listener and the mouse callback functions that return a `bool` value.
+
 
 ### Static ofEvents
 
