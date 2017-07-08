@@ -21,7 +21,7 @@ void ofApp::draw(){
     msg << "Clic and drag over the red square to move it around." << endl;
     msg << "Clic and drag elsewhere to move the camera, hence rotate the magenta box" << endl << endl;
 
-    msg << "Notice that when dragging the red square the camera also changes. This behavior is the one we fix by controlling the event propagation"<<endl;
+    msg << "Notice that when dragging the red square the camera also changes.\nThis behavior is the one we fix by controlling the event propagation"<<endl;
 
 
     ofDrawBitmapStringHighlight(msg.str(), 20,20);
